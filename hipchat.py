@@ -23,7 +23,6 @@ def imgur_search(search=""):
             return u'can i haz valid api keys?'
         else:
             return u'sorry i could not reach imgur :/  E_MSG: {0} E_CODE: {1}'.format(e.error_message, e.status_code)
-
     try:
         items = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
     except ImgurClientError as e:
