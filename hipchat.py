@@ -6,18 +6,29 @@
 from bottle import Bottle, run, get, post, request
 
 from imgurpython import ImgurClient
+from imgurpython.helpers.error import ImgurClientError
 
 import json
 
 import os
 
-def imgur_search(terms=""):
-    imgur_id='3f07d3ccf3b7995'
-    imgur_secret='076bb2967c9a1ffa013f443287b4a0f7d7eb76d7'
+imgur_id = os.environ.get('imgur_id', None)
+imgur_secret = os.environ.get('imgur_secret', None)
 
-    client = ImgurClient(imgur_id, imgur_secret)
+def imgur_search(search=""):
+    try
+        client = ImgurClient(imgur_id, imgur_secret)
+    except ImgurClientError as e:
+        if e.status_code == 503:
+            return u'can i haz valid api keys?'
+        else
+            return u'sorry i could not reach imgur :/  E_MSG: {0} E_CODE: {1}'.format(e.error_message, e.status_code)
 
-    items = client.gallery_search(terms, advanced=None, sort='time', window='all', page=0)
+    try
+        items = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
+    except ImgurClientError as e:
+        return u'derp, something bad happened: {0}'.format(e.error_message)
+
     # for i in items:
     #     print(i.link)
     if len(items) > 0:
@@ -42,6 +53,9 @@ def handle():
     command = m[0]
     parsed = m[1:]
 
+    if parsed[0] == 'debug':
+
+
     image = imgur_search(terms=" ".join(parsed))
 
     resp = {"color":"random",
@@ -58,12 +72,3 @@ def index():
 if __name__=="__main__":
     port = os.environ.get('PORT', 8080)
     run(app, port=port, host='0.0.0.0')
-
-#respond to post with a json message like:
-#
-# {
-#     "color": "green",
-#     "message": "It's going to be sunny tomorrow! (yey)",
-#     "notify": false,
-#     "message_format": "text"
-# }
