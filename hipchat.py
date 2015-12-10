@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# coding=UTF-16
-
 # hipchat imgur bot
+
 #/dankify message here -> returns (m)(e)(s)(s)(a)(g)(e) (h)(e)(r)(e)
 
 from bottle import Bottle, run, get, post, request
@@ -24,7 +23,7 @@ def imgur_search(terms=""):
     if len(items) > 0:
         item = items[0].link
     else:
-        item = u'i got nothing bro 💩'
+        item = u'i got nothing for "{0}", bro'.format(terms)
     return item
 
     # print "tag search"
