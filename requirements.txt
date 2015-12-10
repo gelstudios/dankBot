@@ -1,0 +1,4 @@
+bottle==0.12.9
+imgurpython==1.1.6
+requests==2.8.1
+wheel==0.24.0
