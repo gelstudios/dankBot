@@ -33,7 +33,7 @@ def imgur_search(search=""):
     if len(items) > 0:
         item = items[0].link
     else:
-        item = u'i got nothing for "{0}", bro'.format(terms)
+        item = u'i got nothing for "{0}", bro'.format(search)
     return item
 
     # print "tag search"
@@ -55,13 +55,13 @@ def handle():
     if parsed[0] == 'debug':
         pass
 
-    image = imgur_search(terms=" ".join(parsed))
+    image = imgur_search(search=" ".join(parsed))
 
     resp = {"color":"random",
             "message": image,
             "notify": False,
             "message_format":"text"}
-            
+
     return json.dumps(resp)
 
 @app.route('/', method='GET')
