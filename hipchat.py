@@ -16,15 +16,15 @@ imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
 
 def imgur_search(search=""):
-    try
+    try:
         client = ImgurClient(imgur_id, imgur_secret)
     except ImgurClientError as e:
         if e.status_code == 503:
             return u'can i haz valid api keys?'
-        else
+        else:
             return u'sorry i could not reach imgur :/  E_MSG: {0} E_CODE: {1}'.format(e.error_message, e.status_code)
 
-    try
+    try:
         items = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
     except ImgurClientError as e:
         return u'derp, something bad happened: {0}'.format(e.error_message)
