@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# hipchat imgur bot
+# coding=UTF-16
 
+# hipchat imgur bot
 #/dankify message here -> returns (m)(e)(s)(s)(a)(g)(e) (h)(e)(r)(e)
 
 from bottle import Bottle, run, get, post, request
