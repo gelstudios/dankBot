@@ -53,7 +53,7 @@ def handle():
     parsed = m[1:]
 
     if parsed[0] == 'debug':
-
+        pass
 
     image = imgur_search(terms=" ".join(parsed))
 
@@ -61,7 +61,7 @@ def handle():
             "message": image,
             "notify": False,
             "message_format":"text"}
-
+            
     return json.dumps(resp)
 
 @app.route('/', method='GET')
