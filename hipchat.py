@@ -23,7 +23,7 @@ def imgur_search(terms=""):
     if len(items) > 0:
         item = items[0].link
     else:
-        item = "i got nothing bro"
+        item = u'i got nothing bro 💩'
     return item
 
     # print "tag search"
@@ -50,6 +50,10 @@ def handle():
             "message_format":"text"}
 
     return json.dumps(resp)
+
+@app.route('/', method='GET')
+def index():
+    return "ImgurBot by @gelstudios, add a slash command handler to your chat room and set the URL to this one"
 
 if __name__=="__main__":
     port = os.environ.get('PORT', 8080)
