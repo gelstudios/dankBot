@@ -42,6 +42,11 @@ def imgur_search(search=""):
 
 app = Bottle()
 
+@app.route('/stats')
+def stats():
+    client = ImgurClient(imgur_id, imgur_secret)
+    return repr(client.credits)
+
 @app.route('/', method='POST')
 def handle():
     derp = request.json
@@ -66,7 +71,7 @@ def handle():
 
 @app.route('/', method='GET')
 def index():
-    return "ImgurBot by @gelstudios, add a slash command handler to your chat room and set the URL to this one"
+    return "ImgurBot for hipchat by @gelstudios, add a BYO integration and a slash command handler to your chat room and set the URL to this one.\n TODO: make installation + api keys easier to manage"
 
 if __name__=="__main__":
     port = os.environ.get('PORT', 8080)
