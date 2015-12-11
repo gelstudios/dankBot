@@ -9,8 +9,8 @@ from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
 
 import json
-
 import os
+import datetime
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
@@ -45,7 +45,14 @@ app = Bottle()
 @app.route('/stats')
 def stats():
     client = ImgurClient(imgur_id, imgur_secret)
-    return repr(client.credits)
+    # looks like {u'UserLimit': 500, u'UserRemaining': 500, u'UserReset': 1449849295, u'ClientLimit': 12500, u'ClientRemaining': 11351}
+    template = (
+    "Total credits that can be allocated: {UserLimit}\n"
+    "Total credits available: {UserRemaining}\n"
+    "Timestamp (unix epoch) for when the credits will be reset. {UserReset}\n"
+    "Total credits that can be allocated for the application in a day: {ClientLimit}\n"
+    "Total credits remaining for the application in a day: {ClientRemaining}\n")
+    return template.format(**client.credits)
 
 @app.route('/', method='POST')
 def handle():
