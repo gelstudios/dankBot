@@ -91,8 +91,9 @@ def stats():
 
 @app.route('/capabilities')
 def caps():
-    capabilities = ("{json json json}")
-    return capabilities.format()
+    with open("capabilities.json", "r") as f:
+        c = f.read()
+    return c
 
 @app.route('/', method='POST')
 def handle():
@@ -123,19 +124,26 @@ def handle():
     if who == u'RyanPineau' and random.randint(0,100) == 1:
         message = "/me thinks @{0} needs to shut up...".format(who)
 
-    #message = imgur_search(search=" ".join(parsed))
-
     resp = {"color":"random",
             "message": message,
             "notify": False,
             "message_format":"text"}
+    # log-message
+    print("[dankBot] room={0} who={1} cmd={2} parsed={3} msg={4}").format(room, who, command, parsed, message)
 
-    print("[DANKbot] room={0} who={1} cmd={2} parsed={3} msg={4}").format(room, who, command, parsed, message)
     return json.dumps(resp)
 
 @app.route('/', method='GET')
 def index():
-    return "ImgurBot for hipchat by @gelstudios, add a BYO integration and a slash command handler to your chat room and set the URL to this one.\n TODO: make installation + api keys easier to manage"
+    template = (
+    "<html><body>"
+    "dankBot for hipchat by @gelstudios<br>"
+    "<br>"
+    "The dankest bot in all the land.<br>"
+    "Implements handlers /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
+    "TODO: make api keys easier to manage, google_search"
+    "</body></html>")
+    return template
 
 if __name__=="__main__":
     port = os.environ.get('PORT', 8080)
