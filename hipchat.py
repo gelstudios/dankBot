@@ -35,8 +35,12 @@ def imgur_search(search=""):
     #     print(i.link)
     if len(items) > 0:
         item = items[0]
-        if item.type == "album":
-            item = item.images[0]
+        if item.is_album:
+            try:
+                items = client.get_album_images(item.id)
+            except ImgurClientError as e:
+                return u'derp, something bad happened: {0}'.format(e.error_message)
+        item = items[0]
         item = item.link
     else:
         item = u'i got nothing for "{0}", bro'.format(search)
@@ -116,7 +120,7 @@ def handle():
         message = giphy_search(search=" ".join(parsed))
     elif command == u'/gank':
         message = google_search(search=" ".join(parsed))
-    elif command == u'halp':
+    elif command == u'/halp':
         message = "bro use /dank for imgur, /jank for giphy, /gank for goog"
     else:
         message = "welp! command not found: {0}".format(command)
