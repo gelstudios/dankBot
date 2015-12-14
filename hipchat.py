@@ -83,6 +83,9 @@ def dankify(words):
 
 def dev(command, who):
     print "[dankBot] DEV: {0} USR: {1}".format(repr(command), who)
+
+    if who == 'eromano':
+        return "what is thy bidding, my master?"
     return "dev mode: up up down down left right left right a b start"
 
 app = Bottle()
@@ -119,18 +122,19 @@ def handle():
 
     command = m[0]
     parsed = m[1:]
+    parsed = " ".join(parsed)
 
     # basic logic for multiple slash-commands
     if command == u'/dank':
-        message = imgur_search(search=" ".join(parsed))
+        message = imgur_search(search=parsed)
     elif command == u'/dankify':
-        message = dankify(" ".join(parsed))
+        message = dankify(parsed)
     elif command == u'/dankdev':
-        message = dev(" ".join(parsed), who)
+        message = dev(parsed, who)
     elif command == u'/jank':
-        message = giphy_search(search=" ".join(parsed))
+        message = giphy_search(search=parsed)
     elif command == u'/gank':
-        message = google_search(search=" ".join(parsed))
+        message = google_search(search=parsed)
     elif command == u'/halp':
         message = "bro use /dank for imgur, /jank for giphy, /gank for goog"
     else:
@@ -144,7 +148,7 @@ def handle():
             "notify": False,
             "message_format":"text"}
     # log-message
-    print("[dankBot] room={0} who={1} cmd={2} parsed={3} msg={4}").format(room, who, command, parsed, message)
+    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
 
     return json.dumps(resp)
 
@@ -156,7 +160,7 @@ def index():
     "<br>"
     "The dankest bot in all the land.<br>"
     "Implements handlers: /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
-    "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities</pre><br>"
+    "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities.json</pre><br>"
     "TODO: make api keys easier to manage, implement google_search() handler"
     "</body></html>")
     return template
