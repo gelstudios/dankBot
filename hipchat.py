@@ -31,8 +31,6 @@ def imgur_search(search=""):
     except ImgurClientError as e:
         return u'derp, something bad happened: {0}'.format(e.error_message)
 
-    # for i in items:
-    #     print(i.link)
     if len(items) > 0:
         item = items[0]
         if item.is_album:
@@ -69,11 +67,17 @@ def giphy_search(search=""):
     return item
 
 def google_search(search=""):
-    return u'i got nothing for "{0}", bro'.format(search)
+    # req = requests.url("google.com/somesearch/string")
+    # try:
+    #     items = req.get()
+    #     item = items[0]
+    # except Exception as e:
+        item = u'i got nothing for "{0}", bro'.format(search)
+    return item
 
 def dankify(words):
-    """ /dankify message here -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e) """
-    dank = [ "(space)" if w == " " else "({0})".format(w) for w in words ]
+    """ /dankify message here! -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e)(bang) """
+    dank = [ "(space)" if w == " " else "(bang)" if w == "!" else "({0})".format(w) for w in words ]
     dank = "".join(dank)
     return dank
 
