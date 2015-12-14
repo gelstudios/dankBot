@@ -72,7 +72,7 @@ def google_search(search=""):
     #     items = req.get()
     #     item = items[0]
     # except Exception as e:
-        item = u'i got nothing for "{0}", bro'.format(search)
+    item = u'i got nothing for "{0}", bro'.format(search)
     return item
 
 def dankify(words):
@@ -80,6 +80,10 @@ def dankify(words):
     dank = [ "(space)" if w == " " else "(bang)" if w == "!" else "({0})".format(w) for w in words ]
     dank = "".join(dank)
     return dank
+
+def dev(command, who):
+    print "[dankBot] DEV: {0} USR: {1}".format(repr(command), who)
+    return "dev mode: up up down down left right left right a b start"
 
 app = Bottle()
 
@@ -121,6 +125,8 @@ def handle():
         message = imgur_search(search=" ".join(parsed))
     elif command == u'/dankify':
         message = dankify(" ".join(parsed))
+    elif command == u'/dankdev':
+            message = dev(" ".join(parsed), who)
     elif command == u'/jank':
         message = giphy_search(search=" ".join(parsed))
     elif command == u'/gank':
