@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# hipchat imgur bot
-
-#/dankify message here -> returns (m)(e)(s)(s)(a)(g)(e) (h)(e)(r)(e)
+# hipchat imgur + giphy + goog + etc bot
 
 from bottle import Bottle, run, get, post, request
 
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
+
+import requests
 
 import giphypop
 
@@ -72,7 +72,8 @@ def google_search(search=""):
     return u'i got nothing for "{0}", bro'.format(search)
 
 def dankify(words):
-    dank = [ "({0})".format(w) for w in words ]
+    """ /dankify message here -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e) """
+    dank = [ "(space)" if w == " " else "({0})".format(w) for w in words ]
     dank = "".join(dank)
     return dank
 
@@ -93,7 +94,7 @@ def stats():
     "</body></html>")
     return template.format(**client.credits)
 
-@app.route('/capabilities')
+@app.route('/capabilities.json')
 def caps():
     with open("capabilities.json", "r") as f:
         c = f.read()
@@ -126,7 +127,7 @@ def handle():
         message = "welp! command not found: {0}".format(command)
 
     if who == u'RyanPineau' and random.randint(0,100) == 1:
-        message = "/me thinks @{0} needs to shut up...".format(who)
+        message = "/me thinks @{0} needs to shut the f up...".format(who)
 
     resp = {"color":"random",
             "message": message,
@@ -144,8 +145,9 @@ def index():
     "dankBot for hipchat by @gelstudios<br>"
     "<br>"
     "The dankest bot in all the land.<br>"
-    "Implements handlers /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
-    "TODO: make api keys easier to manage, google_search"
+    "Implements handlers: /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
+    "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities</pre><br>"
+    "TODO: make api keys easier to manage, implement google_search() handler"
     "</body></html>")
     return template
 
