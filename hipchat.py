@@ -126,7 +126,7 @@ def handle():
     elif command == u'/dankify':
         message = dankify(" ".join(parsed))
     elif command == u'/dankdev':
-            message = dev(" ".join(parsed), who)
+        message = dev(" ".join(parsed), who)
     elif command == u'/jank':
         message = giphy_search(search=" ".join(parsed))
     elif command == u'/gank':
