@@ -28,7 +28,6 @@ def handler(commands, who, state):
         p = None
 
     if who == 'eromano':
-        print (commands)
         if cmd == 'hotseat':
             r = hotseat(p, state)
         elif cmd == 'rng':
