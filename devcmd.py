@@ -1,5 +1,7 @@
 import os
 
+authorized = ['eromano','MichaelEmeny','RyanPineau']
+
 def hotseat(p, state):
     if p:
         if p[0] == "add" and len(p) > 1:
@@ -27,7 +29,7 @@ def handler(commands, who, state):
     else:
         p = None
 
-    if who == 'eromano':
+    if who in authorized:
         if cmd == 'hotseat':
             r = hotseat(p, state)
         elif cmd == 'rng':
