@@ -10,13 +10,17 @@ import requests
 
 import giphypop
 
-import json
-import os
-import datetime
-import random
+import json, os, datetime, random
+
+import devcmd
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
+
+state = {
+    'HOTSEAT':[u'RyanPineau'],
+    "RNG" : 100
+    }
 
 def imgur_search(search=""):
     try:
@@ -81,13 +85,6 @@ def dankify(words):
     dank = "".join(dank)
     return dank
 
-def dev(command, who):
-    print "[dankBot] DEV: {0} USR: {1}".format(repr(command), who)
-
-    if who == 'eromano':
-        return "what is thy bidding, my master?"
-    return "dev mode: up up down down left right left right a b start"
-
 app = Bottle()
 
 @app.route('/stats')
@@ -130,7 +127,7 @@ def handle():
     elif command == u'/dankify':
         message = dankify(parsed)
     elif command == u'/dankdev':
-        message = dev(parsed, who)
+        message = devcmd.handler(parsed, who, state)
     elif command == u'/jank':
         message = giphy_search(search=parsed)
     elif command == u'/gank':
@@ -140,7 +137,7 @@ def handle():
     else:
         message = "welp! command not found: {0}".format(command)
 
-    if who == u'RyanPineau' and random.randint(0,100) == 1:
+    if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
 
     resp = {"color":"random",
