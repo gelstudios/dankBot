@@ -6,6 +6,8 @@ from bottle import Bottle, run, get, post, request
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
 
+import random
+
 import requests
 
 import giphypop
@@ -36,13 +38,13 @@ def imgur_search(search=""):
         return u'derp, something bad happened: {0}'.format(e.error_message)
 
     if len(items) > 0:
-        item = items[0]
+	item = random.choice(items)
         if item.is_album:
             try:
                 items = client.get_album_images(item.id)
+	        item = items[0]
             except ImgurClientError as e:
                 return u'derp, something bad happened: {0}'.format(e.error_message)
-        item = items[0]
         item = item.link
     else:
         item = u'i got nothing for "{0}", bro'.format(search)
@@ -64,7 +66,7 @@ def giphy_search(search=""):
         return u'derp, something bad happened: {0}'.format(e)
 
     if items:
-        item = items[0]
+        item = random.choice(items)
         item = item.fixed_height.url
     else:
         item = u'i got nothing for "{0}", bro'.format(search)
