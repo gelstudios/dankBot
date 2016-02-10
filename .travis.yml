@@ -21,4 +21,4 @@ env:
 services: redis
 
 script:
-  - python hipchat.py & ./tests.sh
+  - python hipchat.py & ./test.sh
