@@ -13,10 +13,11 @@ install: "pip install -r requirements.txt"
 
 # env variables
 env:
-  - imgur_id="foo"
-  - imgur_secret="bar"
-  - redis_url="localhost"
-
+  global:
+    - imgur_id="foo"
+    - imgur_secret="bar"
+    - redis_url="localhost"
+    
 # start any services required
 services: redis
 
