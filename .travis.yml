@@ -1,0 +1,26 @@
+
+language: python
+python:
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.5-dev" # 3.5 development branch
+  - "nightly" # currently points to 3.6-dev
+
+# command to install dependencies
+install: "pip install -r requirements.txt"
+
+# env variables
+env:
+- imgur_id="foo"
+- imgur_secret="bar"
+- redis_url="localhost"
+
+# start any services required
+services: redis
+
+script:
+  -python hipchat.py
+  -tests.sh
