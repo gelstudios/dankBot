@@ -1,10 +1,10 @@
 {
-   "key" : "dankBot",
+   "key" : "dankBot_dev",
    "vendor" : {
       "url" : "https://twitter.com/gelstudios",
       "name" : "Eric Romano" },
    "version" : "1.0.0",
-   "name" : "dankBot",
+   "name" : "dankBot_dev",
    "links" : {
       "self" : "http://imgur-hipchat.herokuapp.com/dev_capabilities",
       "homepage" : "https://twitter.com/gelstudios"},
@@ -37,7 +37,7 @@
         "avatar" : {
           "url" : "http://i.imgur.com/4TUtSHn.gif",
           "url@2x" : "http://i.imgur.com/4TUtSHn.gif" },
-        "fromName" : "dankBot",
+        "fromName" : "dankBot_dev",
         "scopes" : [ "send_notification"] },
       "installable" : {
          "allowGlobal" : true,
