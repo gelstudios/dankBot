@@ -1,0 +1,46 @@
+{
+   "key" : "dankBot",
+   "vendor" : {
+      "url" : "https://twitter.com/gelstudios",
+      "name" : "Eric Romano" },
+   "version" : "1.0.0",
+   "name" : "dankBot",
+   "links" : {
+      "self" : "http://imgur-hipchat.herokuapp.com/dev_capabilities",
+      "homepage" : "https://twitter.com/gelstudios"},
+   "capabilities" : {
+      "webhook" : [ {
+            "pattern" : "^/dank .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
+            "pattern" : "^/dankdev .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
+            "pattern" : "^/jank .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
+            "pattern" : "^/dankify .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
+            "pattern" : "^/gank .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
+            "pattern" : "^/halp",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" } ],
+      "hipchatApiConsumer" : {
+        "avatar" : {
+          "url" : "http://i.imgur.com/4TUtSHn.gif",
+          "url@2x" : "http://i.imgur.com/4TUtSHn.gif" },
+        "fromName" : "dankBot",
+        "scopes" : [ "send_notification"] },
+      "installable" : {
+         "allowGlobal" : true,
+         "allowRoom" : true } },
+   "description" : "The dankest bot in all the land. searches imgur, giphy, and google. Use /halp for more info."
+}
