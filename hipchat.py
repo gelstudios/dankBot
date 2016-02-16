@@ -24,6 +24,18 @@ state = {
     "RNG" : 100
     }
 
+
+def search_all(search):
+    message = imgur_search(search)
+    if message is None:
+        message = giphy_search(search)
+        if message is None:
+            google_search(search)
+            if message is None:
+                message = u'i got nothing for "{0}", bro'.format(search)
+    return message
+
+
 def imgur_search(search=""):
     try:
         client = ImgurClient(imgur_id, imgur_secret)
@@ -38,16 +50,16 @@ def imgur_search(search=""):
         return u'derp, something bad happened: {0}'.format(e.error_message)
 
     if len(items) > 0:
-	item = random.choice(items)
+        item = random.choice(items)
         if item.is_album:
             try:
                 items = client.get_album_images(item.id)
-	        item = items[0]
+                item = items[0]
             except ImgurClientError as e:
                 return u'derp, something bad happened: {0}'.format(e.error_message)
         item = item.link
     else:
-        item = u'i got nothing for "{0}", bro'.format(search)
+        item = None
     return item
 
     # print "tag search"
@@ -69,8 +81,9 @@ def giphy_search(search=""):
         item = random.choice(items)
         item = item.fixed_height.url
     else:
-        item = u'i got nothing for "{0}", bro'.format(search)
+        item = None
     return item
+
 
 def google_search(search=""):
     # req = requests.url("google.com/somesearch/string")
@@ -78,8 +91,9 @@ def google_search(search=""):
     #     items = req.get()
     #     item = items[0]
     # except Exception as e:
-    item = u'i got nothing for "{0}", bro'.format(search)
+    item = None
     return item
+
 
 def dankify(words):
     """ /dankify message here! -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e)(bang) """
@@ -88,6 +102,7 @@ def dankify(words):
     return dank
 
 app = Bottle()
+
 
 @app.route('/stats')
 def stats():
@@ -104,11 +119,13 @@ def stats():
     "</body></html>")
     return template.format(**client.credits)
 
+
 @app.route('/capabilities.json')
 def caps():
     with open("capabilities.json", "r") as f:
         c = f.read()
     return c
+
 
 @app.route('/', method='POST')
 def handle():
@@ -125,7 +142,7 @@ def handle():
 
     # basic logic for multiple slash-commands
     if command == u'/dank':
-        message = imgur_search(search=parsed)
+        message = search_all(search=parsed)
     elif command == u'/dankify':
         message = dankify(parsed)
     elif command == u'/dankdev':
@@ -150,6 +167,7 @@ def handle():
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
 
     return json.dumps(resp)
+
 
 @app.route('/', method='GET')
 def index():
