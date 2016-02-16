@@ -158,8 +158,10 @@ def handle():
         message = giphy_search(search=parsed)
     elif command == u'/gank':
         message = google_search(search=parsed)
+    elif command == u'/mank':
+        message = imgur_search(search=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for imgur, /jank for giphy, /gank for goog"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog"
     else:
         message = "welp! command not found: {0}".format(command)
 
