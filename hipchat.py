@@ -18,6 +18,7 @@ import devcmd
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
+DEBUG = os.environ.get('DEBUG', False)
 
 state = {
     'HOTSEAT':[u'RyanPineau'],
@@ -60,6 +61,8 @@ def imgur_search(search=""):
         item = item.link
     else:
         item = None
+        if DEBUG:
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
     return item
 
     # print "tag search"
@@ -82,6 +85,8 @@ def giphy_search(search=""):
         item = item.fixed_height.url
     else:
         item = None
+        if DEBUG:
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "giphy")
     return item
 
 
@@ -92,6 +97,8 @@ def google_search(search=""):
     #     item = items[0]
     # except Exception as e:
     item = None
+    if DEBUG:
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
     return item
 
 
