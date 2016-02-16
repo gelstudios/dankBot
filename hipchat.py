@@ -98,7 +98,7 @@ def google_search(search=""):
     # except Exception as e:
     item = None
     if DEBUG:
-            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
     return item
 
 
