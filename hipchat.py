@@ -48,28 +48,37 @@ def imgur_search(search=""):
         else:
             return u'sorry i could not reach imgur :/  E_MSG: {0} E_CODE: {1}'.format(e.error_message, e.status_code)
     try:
-        items = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
+        search_results = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
     except ImgurClientError as e:
         return u'derp, something bad happened: {0}'.format(e.error_message)
 
-    if len(items) > 0:
-        item = random.choice(items)
+    if len(search_results) > 0:
+        item = random.choice(search_results)
         if item.is_album:
             try:
-                items = client.get_album_images(item.id)
-                item = items[0]
+                search_results = client.get_album_images(item.id)
+                item = search_results[0]
             except ImgurClientError as e:
                 return u'derp, something bad happened: {0}'.format(e.error_message)
-        item = item.link
+
+        # gifs over 10mb get returned with an h appended to their id
+        # shave it off to get the full animated gif
+        # alternative method
+        # if item.link[-5] == 'h':
+        if len(item.link) > 7:
+            gif_link = item.link[0:-5]+item.link[-4:]
+        else:
+            gif_link = item.link
     else:
-        item = None
+        gif_link = None
         if DEBUG:
             print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
-    return item
+    return gif_link
 
     # print "tag search"
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
+
 
 def giphy_search(search=""):
     try:
