@@ -7,10 +7,10 @@ from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
 
 import random
-
 import requests
 
 import giphypop
+import googleapiclient.discovery
 
 import json, os, datetime, random
 
@@ -18,6 +18,8 @@ import devcmd
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
+google_api_key = os.environ.get('google_api_key', None)
+google_cseid = os.environ.get('google_cseid', None)
 DEBUG = os.environ.get('DEBUG', False)
 
 state = {
@@ -91,14 +93,24 @@ def giphy_search(search=""):
 
 
 def google_search(search=""):
-    # req = requests.url("google.com/somesearch/string")
-    # try:
-    #     items = req.get()
-    #     item = items[0]
-    # except Exception as e:
-    item = None
-    if DEBUG:
-            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
+    service = googleapiclient.discovery.build("customsearch", "v1",
+                                              developerKey=google_api_key)
+    res = service.cse().list(
+        q=str(search),
+        cx=google_cseid,
+        searchType="image",
+        safe="high"
+    ).execute()
+
+    num_results = res[u'searchInformation'][u'totalResults']
+    if num_results == 0:
+        item = None
+        if DEBUG:
+                print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
+    else:
+        # pprint.pprint(res)
+        item = random.choice(res[u'items'])[u'link']
+
     return item
 
 
