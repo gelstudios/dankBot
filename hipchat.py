@@ -111,7 +111,7 @@ def google_search(search=""):
         safe="high"
     ).execute()
 
-    num_results = res[u'searchInformation'][u'totalResults']
+    num_results = int(res[u'searchInformation'][u'totalResults'])
     if num_results == 0:
         item = None
         if DEBUG:
