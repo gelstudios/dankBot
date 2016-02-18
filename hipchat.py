@@ -58,9 +58,7 @@ def imgur_search(search=""):
 
         # gifs over 10mb get returned with an h appended to their id
         # shave it off to get the full animated gif
-        # alternative method
-        # if item.link[-5] == 'h':
-        if len(item.link) > 7:
+        if len(item.link) > 7 and item.link[-5] == 'h':
             gif_link = item.link[0:-5]+item.link[-4:]
             if DEBUG:
                 print ("""[dankBot] [DEBUG] search="{0}" link="{1}" Large gif link found, modifying link.""").format(search, item.link)
