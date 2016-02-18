@@ -67,6 +67,8 @@ def imgur_search(search=""):
         # if item.link[-5] == 'h':
         if len(item.link) > 7:
             gif_link = item.link[0:-5]+item.link[-4:]
+            if DEBUG:
+                print ("""[dankBot] [DEBUG] search="{0}" Large gif link found, modifying link.""").format(search, "imgur")
         else:
             gif_link = item.link
     else:
