@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 # hipchat imgur + giphy + goog + etc bot
 
-from bottle import Bottle, run, get, post, request
+from bottle import Bottle, run, request
 
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
-
-import random
-import requests
-
 import giphypop
 import googleapiclient.discovery
-
-import json, os, datetime, random
+import json
+import os
+import random
 
 import devcmd
 
@@ -23,8 +20,8 @@ google_cseid = os.environ.get('google_cseid', None)
 DEBUG = os.environ.get('DEBUG', False)
 
 state = {
-    'HOTSEAT':[u'RyanPineau'],
-    "RNG" : 100
+    'HOTSEAT': [u'RyanPineau'],
+    "RNG": 100
     }
 
 
@@ -192,10 +189,10 @@ def handle():
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
 
-    resp = {"color":"random",
+    resp = {"color": "random",
             "message": message,
             "notify": False,
-            "message_format":"text"}
+            "message_format": "text"}
     # log-message
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
 
@@ -215,6 +212,6 @@ def index():
     "</body></html>")
     return template
 
-if __name__=="__main__":
+if __name__ == "__main__":
     port = os.environ.get('PORT', 8080)
     run(app, port=port, host='0.0.0.0')
