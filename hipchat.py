@@ -152,6 +152,13 @@ def caps():
     return c
 
 
+@app.route('/dev_capabilities.json')
+def dev_caps():
+    with open("dev_capabilities.json", "r") as f:
+        c = f.read()
+    return c
+
+
 @app.route('/', method='POST')
 def handle():
     derp = request.json
