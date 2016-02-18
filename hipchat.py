@@ -33,9 +33,7 @@ def search_all(search):
     if message is None:
         message = giphy_search(search)
         if message is None:
-            google_search(search)
-            if message is None:
-                message = u'i got nothing for "{0}", bro'.format(search)
+            message = google_search(search)
     return message
 
 
@@ -187,6 +185,9 @@ def handle():
         message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog"
     else:
         message = "welp! command not found: {0}".format(command)
+
+    if message is None:
+        message = u'i got nothing for "{0}", bro'.format(parsed)
 
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
