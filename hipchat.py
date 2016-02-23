@@ -1,28 +1,38 @@
 #!/usr/bin/env python
 # hipchat imgur + giphy + goog + etc bot
 
-from bottle import Bottle, run, get, post, request
+from bottle import Bottle, run, request
 
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
-
-import random
-
-import requests
-
 import giphypop
-
-import json, os, datetime, random
+import googleapiclient.discovery
+import json
+import os
+import random
 
 import devcmd
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
+google_api_key = os.environ.get('google_api_key', None)
+google_cseid = os.environ.get('google_cseid', None)
+DEBUG = os.environ.get('DEBUG', False)
 
 state = {
-    'HOTSEAT':[u'RyanPineau'],
-    "RNG" : 100
+    'HOTSEAT': [u'RyanPineau'],
+    "RNG": 100
     }
+
+
+def search_all(search):
+    message = imgur_search(search)
+    if message is None:
+        message = giphy_search(search)
+        if message is None:
+            message = google_search(search)
+    return message
+
 
 def imgur_search(search=""):
     try:
@@ -33,26 +43,37 @@ def imgur_search(search=""):
         else:
             return u'sorry i could not reach imgur :/  E_MSG: {0} E_CODE: {1}'.format(e.error_message, e.status_code)
     try:
-        items = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
+        search_results = client.gallery_search(search, advanced=None, sort='time', window='all', page=0)
     except ImgurClientError as e:
         return u'derp, something bad happened: {0}'.format(e.error_message)
 
-    if len(items) > 0:
-	item = random.choice(items)
+    if len(search_results) > 0:
+        item = random.choice(search_results)
         if item.is_album:
             try:
-                items = client.get_album_images(item.id)
-	        item = items[0]
+                search_results = client.get_album_images(item.id)
+                item = search_results[0]
             except ImgurClientError as e:
                 return u'derp, something bad happened: {0}'.format(e.error_message)
-        item = item.link
+
+        # gifs over 10mb get returned with an h appended to their id
+        # shave it off to get the full animated gif
+        if len(item.link) > 7 and item.link[-5] == 'h':
+            gif_link = item.link[0:-5]+item.link[-4:]
+            if DEBUG:
+                print ("""[dankBot] [DEBUG] search="{0}" link="{1}" Large gif link found, modifying link.""").format(search, item.link)
+        else:
+            gif_link = item.link
     else:
-        item = u'i got nothing for "{0}", bro'.format(search)
-    return item
+        gif_link = None
+        if DEBUG:
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
+    return gif_link
 
     # print "tag search"
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
+
 
 def giphy_search(search=""):
     try:
@@ -69,17 +90,33 @@ def giphy_search(search=""):
         item = random.choice(items)
         item = item.fixed_height.url
     else:
-        item = u'i got nothing for "{0}", bro'.format(search)
+        item = None
+        if DEBUG:
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "giphy")
     return item
 
+
 def google_search(search=""):
-    # req = requests.url("google.com/somesearch/string")
-    # try:
-    #     items = req.get()
-    #     item = items[0]
-    # except Exception as e:
-    item = u'i got nothing for "{0}", bro'.format(search)
+    service = googleapiclient.discovery.build("customsearch", "v1",
+                                              developerKey=google_api_key)
+    res = service.cse().list(
+        q=str(search),
+        cx=google_cseid,
+        searchType="image",
+        safe="high"
+    ).execute()
+
+    num_results = int(res[u'searchInformation'][u'totalResults'])
+    if num_results == 0:
+        item = None
+        if DEBUG:
+                print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
+    else:
+        # pprint.pprint(res)
+        item = random.choice(res[u'items'])[u'link']
+
     return item
+
 
 def dankify(words):
     """ /dankify message here! -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e)(bang) """
@@ -88,6 +125,7 @@ def dankify(words):
     return dank
 
 app = Bottle()
+
 
 @app.route('/stats')
 def stats():
@@ -104,11 +142,20 @@ def stats():
     "</body></html>")
     return template.format(**client.credits)
 
+
 @app.route('/capabilities.json')
 def caps():
     with open("capabilities.json", "r") as f:
         c = f.read()
     return c
+
+
+@app.route('/dev_capabilities.json')
+def dev_caps():
+    with open("dev_capabilities.json", "r") as f:
+        c = f.read()
+    return c
+
 
 @app.route('/', method='POST')
 def handle():
@@ -125,7 +172,7 @@ def handle():
 
     # basic logic for multiple slash-commands
     if command == u'/dank':
-        message = imgur_search(search=parsed)
+        message = search_all(search=parsed)
     elif command == u'/dankify':
         message = dankify(parsed)
     elif command == u'/dankdev':
@@ -134,22 +181,28 @@ def handle():
         message = giphy_search(search=parsed)
     elif command == u'/gank':
         message = google_search(search=parsed)
+    elif command == u'/mank':
+        message = imgur_search(search=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for imgur, /jank for giphy, /gank for goog"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog"
     else:
         message = "welp! command not found: {0}".format(command)
+
+    if message is None:
+        message = u'i got nothing for "{0}", bro'.format(parsed)
 
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
 
-    resp = {"color":"random",
+    resp = {"color": "random",
             "message": message,
             "notify": False,
-            "message_format":"text"}
+            "message_format": "text"}
     # log-message
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
 
     return json.dumps(resp)
+
 
 @app.route('/', method='GET')
 def index():
@@ -164,6 +217,6 @@ def index():
     "</body></html>")
     return template
 
-if __name__=="__main__":
+if __name__ == "__main__":
     port = os.environ.get('PORT', 8080)
     run(app, port=port, host='0.0.0.0')

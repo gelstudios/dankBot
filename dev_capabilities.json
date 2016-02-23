@@ -30,6 +30,10 @@
             "url" : "http://imgur-hipchat-dev.herokuapp.com",
             "event" : "room_message" },
             {
+            "pattern" : "^/mank .+",
+            "url" : "http://imgur-hipchat-dev.herokuapp.com",
+            "event" : "room_message" },
+            {
             "pattern" : "^/halp",
             "url" : "http://imgur-hipchat-dev.herokuapp.com",
             "event" : "room_message" } ],
