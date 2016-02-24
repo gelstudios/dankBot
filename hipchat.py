@@ -2,16 +2,15 @@
 # hipchat imgur + giphy + goog + etc bot
 
 from bottle import Bottle, run, request
-
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
+from dice import roll_the_dice
+import devcmd
 import giphypop
 import googleapiclient.discovery
 import json
 import os
 import random
-
-import devcmd
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
@@ -20,10 +19,9 @@ google_cseid = os.environ.get('google_cseid', None)
 DEBUG = os.environ.get('DEBUG', False)
 
 state = {
-    'HOTSEAT': [u'RyanPineau'],
+    'HOTSEAT': [u'Pinot'],
     "RNG": 100
     }
-
 
 def search_all(search):
     message = imgur_search(search)
@@ -32,7 +30,6 @@ def search_all(search):
         if message is None:
             message = google_search(search)
     return message
-
 
 def imgur_search(search=""):
     try:
@@ -74,18 +71,15 @@ def imgur_search(search=""):
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
 
-
 def giphy_search(search=""):
     try:
         client = giphypop.Giphy()
     except Exception as e:
         return u'sorry i could not reach giphy :/ E_MSG: {0}'.format(e)
-
     try:
         items = client.search_list(phrase=search)
     except Exception as e:
         return u'derp, something bad happened: {0}'.format(e)
-
     if items:
         item = random.choice(items)
         item = item.fixed_height.url
@@ -110,13 +104,11 @@ def google_search(search=""):
     if num_results == 0:
         item = None
         if DEBUG:
-                print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
     else:
         # pprint.pprint(res)
         item = random.choice(res[u'items'])[u'link']
-
     return item
-
 
 def dankify(words):
     """ /dankify message here! -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e)(bang) """
@@ -125,7 +117,6 @@ def dankify(words):
     return dank
 
 app = Bottle()
-
 
 @app.route('/stats')
 def stats():
@@ -142,13 +133,11 @@ def stats():
     "</body></html>")
     return template.format(**client.credits)
 
-
 @app.route('/capabilities.json')
 def caps():
     with open("capabilities.json", "r") as f:
         c = f.read()
     return c
-
 
 @app.route('/dev_capabilities.json')
 def dev_caps():
@@ -156,16 +145,13 @@ def dev_caps():
         c = f.read()
     return c
 
-
 @app.route('/', method='POST')
 def handle():
     derp = request.json
     msg = derp[u'item'][u'message'][u'message']
     room = derp[u'item'][u'room'][u'name']
     who = derp[u'item'][u'message'][u'from'][u'mention_name']
-
     m = msg.split()
-
     command = m[0]
     parsed = m[1:]
     parsed = " ".join(parsed)
@@ -183,6 +169,8 @@ def handle():
         message = google_search(search=parsed)
     elif command == u'/mank':
         message = imgur_search(search=parsed)
+    elif command == u'/roll':
+        message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
         message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog"
     else:
@@ -200,9 +188,7 @@ def handle():
             "message_format": "text"}
     # log-message
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
-
     return json.dumps(resp)
-
 
 @app.route('/', method='GET')
 def index():
