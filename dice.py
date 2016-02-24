@@ -5,7 +5,6 @@ import random
 def roll_the_dice(stuff = ""):
     if stuff.isdigit(): # If the string is all digits, will return true
         size = int(stuff) # Because stuff is a string, we need a integer
-    else:
         if size <= 0:
             result = "Cannot roll 0, bro. Come on, think of a 0 sided die."
         else:
