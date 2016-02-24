@@ -4,7 +4,7 @@ import random
 
 def roll_the_dice(stuff = ""):
     if stuff[0] == "-":
-            result = "There's no such thing as a negative die, bro."
+        result = "There's no such thing as a negative die, bro."
     else:
         if stuff.isdigit(): # If the string is all digits, will return true
             size = int(stuff) # Because stuff is a string, we need a integer
