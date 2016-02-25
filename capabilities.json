@@ -38,7 +38,7 @@
             "url" : "http://imgur-hipchat.herokuapp.com",
             "event" : "room_message" } ],
             {
-            "pattern" : "^/roll .+",
+            "pattern" : "^/roll",
             "url" : "http://imgur-hipchat.herokuapp.com",
             "event" : "room_message" },
       "hipchatApiConsumer" : {
