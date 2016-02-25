@@ -11,7 +11,7 @@ def roll_the_dice(stuff = ""):
         else:
             if stuff.isdigit(): # If the string is all digits, will return true
                 size = int(stuff) # Because stuff is a string, we need a integer
-                if size == 0 or 1: # If the integer is 0 or 1
+                if size <= 1: # If the integer is 0 or 1
                     result = "Cannot roll {0}, bro. Come on, think of a {0} sided die.".format(size)
                 else:
                     result = random.randint(1,size) # Random int from 1 to size
