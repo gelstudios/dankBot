@@ -172,7 +172,7 @@ def handle():
     elif command == u'/roll':
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll"
     else:
         message = "welp! command not found: {0}".format(command)
 
