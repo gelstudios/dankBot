@@ -173,6 +173,14 @@ def handle():
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
         message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll"
+    elif command == u'/attack':
+        message = battle.handler(command, parsed, dank_json)
+    elif command == u'/block':
+        message = battle.handler(command, parsed, dank_json)
+    elif command == u'/rez':
+        message = battle.handler(command,parsed, dank_json)
+    elif command == u'/status':
+        message = battle.handler(command, parsed, dank_json)
     else:
         message = "welp! command not found: {0}".format(command)
 

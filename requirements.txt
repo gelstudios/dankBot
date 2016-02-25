@@ -6,6 +6,7 @@ imgurpython==1.1.6
 oauth2client==2.0.0
 pyasn1==0.1.9
 pyasn1-modules==0.0.8
+redis==2.10.5
 requests==2.8.1
 rsa==3.3
 simplejson==3.8.2
