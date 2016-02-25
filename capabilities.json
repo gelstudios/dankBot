@@ -37,6 +37,10 @@
             "pattern" : "^/halp",
             "url" : "http://imgur-hipchat.herokuapp.com",
             "event" : "room_message" } ],
+            {
+            "pattern" : "^/roll .+",
+            "url" : "http://imgur-hipchat.herokuapp.com",
+            "event" : "room_message" },
       "hipchatApiConsumer" : {
         "avatar" : {
           "url" : "http://i.imgur.com/4TUtSHn.gif",
