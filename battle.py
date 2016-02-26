@@ -26,6 +26,8 @@ quips = {
     "rez": ["{0} starts coming back to life!", "Is a pheonix rising from the ashes."],
     "rezzing": ["{0} is still scraping his entrails together.", "{0} is still remembering how to be alive."],
     "dead": ["{0} is dead and cannot do anything.", ],
+    "stupid": ["{0} went insane and decided to stab himself.", "{0} is a moron and attacked himself!"],
+    "not the time": ["now is not the time to use that", ],
 }
 
 MEME_SEARCH = {
@@ -33,8 +35,11 @@ MEME_SEARCH = {
     "damage": "attacking",
     "kill": "murdered",
     "rez": "ressurect",
+    "stupid": "stupid",
 
 }
+
+
 class Player(object):
     def __init__(self, player_data):
 
@@ -110,6 +115,9 @@ def handler(cmd, cmd_args, dank_json):
         player = create_new_player(who_id, who)
         save_player(player)
 
+    if cmd == "/status":
+        return repr(player)
+
     if player.status == "dead":
         if cmd == "/rez":
             return rez(player)
@@ -121,25 +129,22 @@ def handler(cmd, cmd_args, dank_json):
         else:
             player.status = "alive"
             player.hp = player.max_hp
+            save_player(player)
 
     if cmd == "/attack":
         mentions = dank_json[u'item'][u'message'][u'mentions']
         return attack(player, cmd_args.split(), mentions)
     elif cmd == "/block":
         return block(player)
-    elif cmd == "/status":
-        return repr(player)
+    elif cmd == "/rez":
+        return get_quip("not the time").format()
     else:
         return "herp derp"
 
 
 def attack(player, args, mentions):
-    if not args:
-        response = "{1} flails wildly at the air and his himself in the face.".format(player.name)
-        return response
-
-    if not mentions:
-        response = "{0} doesn't know whats going on, sets himself on fire.".format(player.name)
+    if not args or not mentions:
+        response = get_quip("no_target").format(player.name)
         return response
 
     if len(mentions) > 1 and len(args) > 1:
@@ -149,6 +154,7 @@ def attack(player, args, mentions):
         if not target:
             target = create_new_player(mentions[0].get("id"), mentions[0].get("name"))
 
+        # Check for dead target
         if target.status == "dead":
             response = get_quip("already_dead").format(target.name, player.name)
             return response
@@ -173,8 +179,12 @@ def attack(player, args, mentions):
             response = get_quip("killed").format(player.name, target.name)
             response += os.linesep + hipchat.search_all(MEME_SEARCH.get("kill"))
         else:
-            response = get_quip("damaged").format(player.name, target.name, target.attack)
-            response += os.linesep + hipchat.search_all(MEME_SEARCH.get("damage"))
+            if player.name == target.name:
+                response = get_quip("stupid").format(player.name)
+                response += os.linesep + hipchat.search_all(MEME_SEARCH.get("stupid"))
+            else:
+                response = get_quip("damaged").format(player.name, target.name, target.attack)
+                response += os.linesep + hipchat.search_all(MEME_SEARCH.get("damage"))
     return response
 
 
