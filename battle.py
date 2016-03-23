@@ -31,11 +31,13 @@ quips = {
 }
 
 MEME_SEARCH = {
-    "block": "blocking",
-    "damage": "attacking",
-    "kill": "murdered",
-    "rez": "ressurect",
-    "stupid": "stupid",
+    "blocking": ["blocking", "shield", "defending", ],
+    "damaged": ["attacking", "attack", "damaged", ],
+    "kill": ["murdered", "end of lifed", "ceased to be" ],
+    "rez": ["ressurect", ],
+    "stupid": ["stupid", "idiot", "baka", ],
+    "already_dead": ["he's dead jim", "beat a dead horse", ],
+    "not the time": ["now is not the time to use that", ]
 
 }
 
@@ -137,7 +139,7 @@ def handler(cmd, cmd_args, dank_json):
     elif cmd == "/block":
         return block(player)
     elif cmd == "/rez":
-        return get_quip("not the time").format()
+        return get_quip("not the time").format() + get_meme("not the time")
     else:
         return "herp derp"
 
@@ -157,6 +159,7 @@ def attack(player, args, mentions):
         # Check for dead target
         if target.status == "dead":
             response = get_quip("already_dead").format(target.name, player.name)
+            response += get_meme("already_dead")
             return response
 
         # Check for blocking
@@ -177,14 +180,14 @@ def attack(player, args, mentions):
         save_player(target)
         if target.status == "dead":
             response = get_quip("killed").format(player.name, target.name)
-            response += os.linesep + hipchat.search_all(MEME_SEARCH.get("kill"))
+            response += get_meme("kill")
         else:
             if player.name == target.name:
                 response = get_quip("stupid").format(player.name)
-                response += os.linesep + hipchat.search_all(MEME_SEARCH.get("stupid"))
+                response += get_meme("stupid")
             else:
                 response = get_quip("damaged").format(player.name, target.name, target.attack)
-                response += os.linesep + hipchat.search_all(MEME_SEARCH.get("damage"))
+                response += get_meme("damaged")
     return response
 
 
@@ -192,7 +195,7 @@ def block(player):
     player.status = "blocking"
     save_player(player)
     response = get_quip("blocking").format(player.name)
-    response += os.linesep + hipchat.search_all(MEME_SEARCH.get("block"))
+    response += get_meme("blocking")
     return response
 
 
@@ -200,5 +203,16 @@ def rez(player):
     player.status = "rezzing"
     save_player(player)
     response = get_quip("rez").format(player.name)
-    response += os.linesep + hipchat.search_all(MEME_SEARCH.get("block"))
+    response += get_meme("rez")
     return response
+
+
+def get_meme(key):
+    if key not in MEME_SEARCH:
+        return
+    else:
+        meme = random.choice(MEME_SEARCH.get(key))
+        meme_link = hipchat.search_all(meme)
+        if hipchat.DEBUG:
+                print ("""[dankBot] [DEBUG] meme search="{0}" link="{1}" """).format(meme, meme_link)
+        return os.linesep + meme_link
