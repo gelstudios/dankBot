@@ -10,35 +10,7 @@
       "homepage" : "https://twitter.com/gelstudios"},
    "capabilities" : {
       "webhook" : [ {
-            "pattern" : "^/dank .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/dankdev .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/jank .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/dankify .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/gank .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/mank .+",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/halp",
-            "url" : "http://imgur-hipchat-dev.herokuapp.com",
-            "event" : "room_message" },
-            {
-            "pattern" : "^/roll",
+            "pattern" : "^/.+",
             "url" : "http://imgur-hipchat-dev.herokuapp.com",
             "event" : "room_message" }],
       "hipchatApiConsumer" : {
