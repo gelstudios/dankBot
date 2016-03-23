@@ -215,4 +215,7 @@ def get_meme(key):
         meme_link = hipchat.search_all(meme)
         if hipchat.DEBUG:
                 print ("""[dankBot] [DEBUG] meme search="{0}" link="{1}" """).format(meme, meme_link)
+        if hipchat.NO_BATTLE_MEME:
+            if "False" not in hipchat.NO_BATTLE_MEME:
+                return ""
         return os.linesep + meme_link
