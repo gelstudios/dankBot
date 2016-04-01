@@ -27,11 +27,19 @@ state = {
     }
 
 def search_all(search):
-    message = imgur_search(search)
+    results = []
+    all_imgur = imgur_search(search)
+    if all_imgur:
+        results.append(all_imgur)
+    all_giphy = giphy_search(search)
+    if all_giphy:
+        results.append(all_giphy)
+    all_google = google_search(search)
+    if all_google:
+        results.append(all_google)
+    message = random.choice(results)
     if message is None:
-        message = giphy_search(search)
-        if message is None:
-            message = google_search(search)
+        message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
     return message
 
 def imgur_search(search=""):
