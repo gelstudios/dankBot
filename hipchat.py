@@ -34,9 +34,9 @@ def search_all(search):
     all_giphy = giphy_search(search)
     if all_giphy:
         results.append(all_giphy)
-    all_google = google_search(search)
-    if all_google:
-        results.append(all_google)
+    # all_google = google_search(search)
+    # if all_google:
+    #   results.append(all_google)
     message = random.choice(results)
     if message is None:
         message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
