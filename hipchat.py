@@ -37,9 +37,15 @@ def search_all(search):
     # all_google = google_search(search)
     # if all_google:
     #   results.append(all_google)
-    message = random.choice(results)
-    if message is None:
-        message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
+
+    if not results:
+        results.append(google_search(search))
+        if not results:
+            message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
+        else:
+            message = results[0]
+    else:
+        message = random.choice(results)
     return message
 
 def imgur_search(search=""):
