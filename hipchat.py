@@ -12,11 +12,14 @@ import json
 import os
 import random
 
+import battle
+
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
 google_api_key = os.environ.get('google_api_key', None)
 google_cseid = os.environ.get('google_cseid', None)
 DEBUG = os.environ.get('DEBUG', False)
+NO_BATTLE_MEME = os.environ.get('NOMEME', False)
 
 state = {
     'HOTSEAT': [u'Pinot'],
@@ -24,11 +27,25 @@ state = {
     }
 
 def search_all(search):
-    message = imgur_search(search)
-    if message is None:
-        message = giphy_search(search)
-        if message is None:
-            message = google_search(search)
+    results = []
+    all_imgur = imgur_search(search)
+    if all_imgur:
+        results.append(all_imgur)
+    all_giphy = giphy_search(search)
+    if all_giphy:
+        results.append(all_giphy)
+    # all_google = google_search(search)
+    # if all_google:
+    #   results.append(all_google)
+
+    if not results:
+        results.append(google_search(search))
+        if not results:
+            message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
+        else:
+            message = results[0]
+    else:
+        message = random.choice(results)
     return message
 
 def imgur_search(search=""):
@@ -173,6 +190,14 @@ def handle():
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
         message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll"
+    elif command == u'/attack':
+        message = battle.handler(command, parsed, derp)
+    elif command == u'/block':
+        message = battle.handler(command, parsed, derp)
+    elif command == u'/rez':
+        message = battle.handler(command,parsed, derp)
+    elif command == u'/status':
+        message = battle.handler(command, parsed, derp)
     else:
         message = "welp! command not found: {0}".format(command)
 
