@@ -79,29 +79,30 @@ class Game(object):
 def cards_handler(cmd, cmd_args, dank_json):
     who_id = dank_json[u'item'][u'message'][u'from'][u'id']
     who_name = dank_json[u'item'][u'message'][u'from'][u'name']
+    roomid = dank_json[u'item'][u'room'][u'id']
 
     if cmd_args == "newgame":
-        game, message = create_new_game(who_id, who_name)
+        game, message = create_new_game(who_id, who_name, roomid)
         if game:
-            save_game(game)
+            save_game(game, roomid)
         return message
 
     elif cmd_args == "join":
-        return player_join_game(who_id, who_name)
+        return player_join_game(who_id, who_name, roomid)
     elif cmd_args == "start":
-        return start_game()
+        return start_game(roomid)
     elif cmd_args == "next":
-        return start_round(None)
+        return start_round(None, roomid)
     elif "play" in cmd_args:
-        return play_cards(cmd_args, who_id, who_name)
+        return play_cards(cmd_args, who_id, who_name, roomid)
     elif "choose" in cmd_args:
-        return choose(cmd_args, who_id)
+        return choose(cmd_args, who_id, roomid)
     else:
         return HELP_STRING
 
 
-def play_cards(cards, who_id, who_name):
-    game = get_game()
+def play_cards(cards, who_id, who_name, roomid):
+    game = get_game(roomid)
 
     already_played = game.rounds.get(str(game.round)).get("turn_taken")
     if who_id in already_played:
@@ -146,13 +147,13 @@ def play_cards(cards, who_id, who_name):
 
         send_czar_cards(game, game.czar.get("id"), game.round_cards)
 
-    save_game(game)
+    save_game(game, roomid)
     return message
 
 
-def choose(card, who_id):
+def choose(card, who_id, roomid):
     message = ""
-    game = get_game()
+    game = get_game(roomid)
     if who_id != game.czar.get("id"):
         return "Only the card czar can choose a winner."
     if game.round <= 0:
@@ -196,7 +197,7 @@ def choose(card, who_id):
             message += "{who} has reached {scorecap} points and wins the game!\n".format(who=winner_name, scorecap=game.score_cap)
             game.score_cap = -1
 
-        save_game(game)
+        save_game(game, roomid)
         return message
 
 
@@ -207,8 +208,8 @@ def replace_card(card, game, who_id):
         print(ie.message)
 
 
-def create_new_game(who_id, who_name):
-    game = get_game()
+def create_new_game(who_id, who_name, roomid):
+    game = get_game(roomid)
     if not game:
         new_game = create_game(who_id=who_id, who_name=who_name)
         return new_game, "{who} has wants to play Cards Against Humanity! \"/cards join\" to join the game.".format(who=who_name)
@@ -234,20 +235,20 @@ def create_game(who_id, who_name):
     return Game(new_game_setup)
 
 
-def player_join_game(who_id, who_name):
-    game = get_game()
+def player_join_game(who_id, who_name, roomid):
+    game = get_game(roomid)
     if not game:
         message = "There is no game to join. \"/cards newgame\" to start"
         return message
     else:
         game.players[who_id] = {"score": 0, "name": who_name, "hand": {}}
-        save_game(game)
+        save_game(game, roomid)
         message = "{who} has joined the game.".format(who=who_name)
         return message
 
 
-def start_game():
-    game = get_game()
+def start_game(roomid):
+    game = get_game(roomid)
     if not game:
         message = "There is no game to start. \"/cards newgame\" to start"
         return message
@@ -257,13 +258,13 @@ def start_game():
         # game.round = 1
         # game.round = next_round(game)
         give_start_cards(game)
-        message = start_round(game)
+        message = start_round(game, roomid)
     return message
 
 
-def start_round(game):
+def start_round(game, roomid):
     if not game:
-        game = get_game()
+        game = get_game(roomid)
 
     if game.score_cap < 0:
         return "The game has ended. Start a new one."
@@ -278,7 +279,7 @@ def start_round(game):
     game.cards_played["black"].append(black_card)
     black_card_contents = get_black_card_contents(black_card)
     message = "{who} is the card czar.\n\n {card}\nPick {pick}.".format(who=game.czar.get("name"), card=black_card_contents['text'], pick=black_card_contents['pick'])
-    save_game(game)
+    save_game(game, roomid)
     return message
 
 
@@ -408,8 +409,9 @@ def get_card_data():
     return json.loads(data)
 
 
-def get_game():
-    data = redis_connection.get("card_game")
+def get_game(roomid):
+    game_name = "card_game." + str(roomid)
+    data = redis_connection.get(game_name)
     if data:
         mer = json.loads(data, "ascii")
         ret = Game(mer)
@@ -418,5 +420,6 @@ def get_game():
         return None
 
 
-def save_game(game):
-    redis_connection.set("card_game", json.dumps(game.__dict__).encode("utf8"))
+def save_game(game, roomid):
+    game_name = "card_game." + str(roomid)
+    redis_connection.set(game_name, json.dumps(game.__dict__).encode("utf8"))
