@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # hipchat imgur + giphy + goog + etc bot
 
-from bottle import Bottle, run, request
+from bottle import Bottle, run, request, response
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
 from dice import roll_the_dice
@@ -162,6 +162,7 @@ def dev_caps():
 
 @app.route('/', method='POST')
 def handle():
+    response.content_type = 'application/json'
     derp = request.json
     msg = derp[u'item'][u'message'][u'message']
     room = derp[u'item'][u'room'][u'name']
@@ -212,7 +213,9 @@ def handle():
             "notify": False,
             "message_format": "text"}
     # log-message
-    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
+    # print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
+    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""".format(room, who, command, parsed, message))
+
     return json.dumps(resp)
 
 @app.route('/', method='GET')

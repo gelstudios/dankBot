@@ -28,6 +28,15 @@ HELP_STRING = "/cards newgame - start a new game of cah\n" \
               "/cards choose <card number> - choose the winning card(s)\n" \
               "/cards next - start the next round of play"
 
+# HELP_STRING = ["/cards newgame - start a new game of cah",
+#                "/cards join - join a game",
+#                "/cards start - start the game once everyone has joined",
+#                "/cards play <card number> - play a card from your hand",
+#                "/cards choose <card number> - choose the winning card(s)",
+#                "/cards next - start the next round of play"]
+
+
+
 # example game object layout
 card_game = {"players": {"player1": {"score": 0,
                                      "name": "player1name",
@@ -48,7 +57,7 @@ card_game = {"players": {"player1": {"score": 0,
                         },
              "czar": {"id": 'player1id', "name": 'player1'},
              "black_card": -1,
-             "round_cards": {},
+             "round_cards":  {"userid": 11234, "cards": ["card1", "card2"]},
              "cards_played": {"black": [1, 2, 3],
                               "white": [12, 34, 56]}
              }
@@ -98,11 +107,19 @@ def cards_handler(cmd, cmd_args, dank_json):
     elif "choose" in cmd_args:
         return choose(cmd_args, who_id, roomid)
     else:
+        # ret = '\n'.join(HELP_STRING)
+        # return ret
         return HELP_STRING
 
 
 def play_cards(cards, who_id, who_name, roomid):
     game = get_game(roomid)
+    if who_id == game.czar.get("id"):
+        if LOCAL_DEBUG:
+            # allow this for testing and debugging
+            pass
+        else:
+            return "The card czar cannot play his own round!"
 
     already_played = game.rounds.get(str(game.round)).get("turn_taken")
     if who_id in already_played:
