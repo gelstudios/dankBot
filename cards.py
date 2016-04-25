@@ -48,6 +48,7 @@ card_game = {"players": {"player1": {"score": 0,
                             "turn_taken": []},
                         },
              "czar": {"id": 'player1id', "name": 'player1'},
+             "czar_list": [1234, 5342, 4113],
              "black_card": -1,
              "round_cards":  {"userid": 11234, "cards": ["card1", "card2"]},
              "cards_played": {"black": [1, 2, 3],
@@ -67,6 +68,7 @@ class Game(object):
         self.rounds = game_data.get("rounds")
         self.black_card = game_data.get("black_card")
         self.czar = game_data.get("czar")
+        self.czar_list = game_data.get("czar_list")
         self.round_cards = game_data.get("round_cards")
         self.cards_played = game_data.get("cards_played")
 
@@ -168,9 +170,6 @@ def choose(card, who_id, roomid):
     if game.rounds[str(game.round)].get("win_cards").get("blackcard") >= 0:
         return "This round is over."
     chosen_card = card.split()[1:][0]
-    # pick_num = get_black_card_contents(game.black_card)['pick']
-    # if len(chosen_card) != pick_num:
-    #     return "You must choose {pick} card(s).".format(pick=pick_num)
     if not chosen_card:
         return "You must choose a winner"
 
@@ -236,6 +235,7 @@ def create_game(who_id, who_name):
         "hand_size": 10,
         "black_card": -1,
         "czar": {"id": who_id, "name": who_name},
+        "czar_list": [who_id],
         "round_cards": {},
         "cards_played": {"black": [], "white": []}
     }
@@ -249,6 +249,7 @@ def player_join_game(who_id, who_name, roomid):
         return message
     else:
         game.players[who_id] = {"score": 0, "name": who_name, "hand": {}}
+        game.czar_list.append(who_id)
         save_game(game, roomid)
         message = "{who} has joined the game.".format(who=who_name)
         return message
@@ -280,14 +281,29 @@ def start_round(game, roomid):
         if game.rounds[str(game.round)].get("win_cards").get("blackcard") < 0:
             return "This round is still going."
 
+    if game.round >= 1:
+        game.czar = next_czar(game)
+
     game.round = next_round(game)
     black_card = get_black_card(game)
     game.black_card = black_card
     game.cards_played["black"].append(black_card)
     black_card_contents = get_black_card_contents(black_card)
+
     message = "{who} is the card czar.\n\n {card}\nPick {pick}.".format(who=game.czar.get("name"), card=black_card_contents['text'], pick=black_card_contents['pick'])
     save_game(game, roomid)
     return message
+
+
+def next_czar(game):
+    current_czar_id = game.czar.get("id")
+    try:
+        new_czar_id = game.czar_list[game.czar_list.index(current_czar_id)+1]
+    except IndexError as ie:
+        new_czar_id = game.czar_list[0]
+
+    new_czar = {"id": int(new_czar_id), "name": game.players.get(str(new_czar_id)).get("name")}
+    return new_czar
 
 
 def next_round(game):
