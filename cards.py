@@ -25,16 +25,8 @@ HELP_STRING = "/cards newgame - start a new game of cah\n" \
               "/cards join - join a game\n" \
               "/cards start - start the game once everyone has joined\n" \
               "/cards play <card number> - play a card from your hand\n" \
-              "/cards choose <card number> - choose the winning card(s)\n" \
+              "/cards choose <card number> - choose the winning card[s]\n" \
               "/cards next - start the next round of play"
-
-# HELP_STRING = ["/cards newgame - start a new game of cah",
-#                "/cards join - join a game",
-#                "/cards start - start the game once everyone has joined",
-#                "/cards play <card number> - play a card from your hand",
-#                "/cards choose <card number> - choose the winning card(s)",
-#                "/cards next - start the next round of play"]
-
 
 
 # example game object layout
@@ -107,8 +99,6 @@ def cards_handler(cmd, cmd_args, dank_json):
     elif "choose" in cmd_args:
         return choose(cmd_args, who_id, roomid)
     else:
-        # ret = '\n'.join(HELP_STRING)
-        # return ret
         return HELP_STRING
 
 
@@ -158,7 +148,7 @@ def play_cards(cards, who_id, who_name, roomid):
 
     message = "{who} played their card.".format(who=who_name)
 
-    if len(already_played) >= len(game.players):
+    if len(already_played) >= len(game.players)-1:
         message += "\nEveryone has played a card."
         message += "\nWaiting for czar to pick a winner."
 
@@ -185,7 +175,7 @@ def choose(card, who_id, roomid):
         return "You must choose a winner"
 
     already_played = game.rounds.get(str(game.round)).get("turn_taken")
-    if len(already_played) < len(game.players):
+    if len(already_played) < len(game.players)-1:
         return "\nPlease wait for all players to play a card..."
     else:
         winner_name = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("name")
