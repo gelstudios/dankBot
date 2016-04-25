@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # hipchat imgur + giphy + goog + etc bot
 
-from bottle import Bottle, run, request
+from bottle import Bottle, run, request, response
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError
 from dice import roll_the_dice
@@ -13,6 +13,7 @@ import os
 import random
 
 import battle
+import cards
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
@@ -34,9 +35,6 @@ def search_all(search):
     all_giphy = giphy_search(search)
     if all_giphy:
         results.append(all_giphy)
-    # all_google = google_search(search)
-    # if all_google:
-    #   results.append(all_google)
 
     if not results:
         results.append(google_search(search))
@@ -164,6 +162,7 @@ def dev_caps():
 
 @app.route('/', method='POST')
 def handle():
+    response.content_type = 'application/json'
     derp = request.json
     msg = derp[u'item'][u'message'][u'message']
     room = derp[u'item'][u'room'][u'name']
@@ -189,7 +188,7 @@ def handle():
     elif command == u'/roll':
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /cards for cards againt humanity"
     elif command == u'/attack':
         message = battle.handler(command, parsed, derp)
     elif command == u'/block':
@@ -198,6 +197,8 @@ def handle():
         message = battle.handler(command,parsed, derp)
     elif command == u'/status':
         message = battle.handler(command, parsed, derp)
+    elif command == u'/cards':
+        message = cards.cards_handler(command, parsed, derp)
     else:
         message = "welp! command not found: {0}".format(command)
 
@@ -212,7 +213,9 @@ def handle():
             "notify": False,
             "message_format": "text"}
     # log-message
-    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
+    # print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
+    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""".format(room, who, command, parsed, message))
+
     return json.dumps(resp)
 
 @app.route('/', method='GET')
