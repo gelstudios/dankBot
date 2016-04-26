@@ -109,8 +109,38 @@ def cards_handler(cmd, cmd_args, dank_json):
         return choose(cmd_args, who_id, roomid)
     elif "waiting" in cmd_args:
         return waiting_on(roomid)
+    elif "leave" in cmd_args:
+        return leave_game(roomid, who_id, who_name)
     else:
         return HELP_STRING
+
+
+def leave_game(roomid, whoid, who_name):
+    game = get_game(roomid)
+    if not game:
+        message = "There is no game. \"/cards newgame\" to start"
+        return message
+
+    if str(whoid) not in game.players.keys():
+        return "You are not in this game."
+
+    if whoid == game.czar.get("id"):
+            return "The card czar cannot leave during their round!"
+
+    del game.players[str(whoid)]
+
+    if len(game.players) <= 1:
+        ret = "Everyone has left. Ending the game."
+        end_game(game)
+    else:
+        ret = "{who} has left the game.".format(who=who_name)
+
+    save_game(game, roomid)
+    return ret
+
+
+def end_game(game):
+    game.score_cap = -1
 
 
 def waiting_on(roomid):
@@ -122,13 +152,17 @@ def waiting_on(roomid):
     all_players = game.players.keys()
     waiting = []
     for playerid in all_players:
-        if playerid not in have_played:
-            waiting.append(game.players.get(playerid).get("name"))
+        if int(playerid) not in have_played:
+            if int(playerid) != game.czar.get("id"):
+                waiting.append(game.players.get(playerid).get("name"))
 
     ret = "Waiting on "
-    for person in waiting:
-        ret += person
-        ret += " "
+    if not waiting:
+        ret += "nobody"
+    else:
+        for person in waiting:
+            ret += person
+            ret += " "
     return ret
 
 
@@ -231,7 +265,7 @@ def choose(card, who_id, roomid):
 
         if score >= game.score_cap:
             message += "{who} has reached {scorecap} points and wins the game!\n".format(who=winner_name, scorecap=game.score_cap)
-            game.score_cap = -1
+            end_game(game)
 
         save_game(game, roomid)
         return message
