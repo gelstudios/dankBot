@@ -1,3 +1,9 @@
+# TODO
+# Randomize cards before having card czar pick
+# Ability to leave game, or pause/skip turns until returning
+# Post played cards in room and/or card czars DMs
+
+
 import os
 import redis
 import json
@@ -21,12 +27,13 @@ redis_connection = redis.StrictRedis(host=os.environ.get("REDIS_HOST"),
 
 cards_data = json.loads(redis_connection.get(REDIS_DATA_KEY))
 
-HELP_STRING = "/cards newgame - start a new game of cah\n" \
-              "/cards join - join a game\n" \
-              "/cards start - start the game once everyone has joined\n" \
-              "/cards play <card number> - play a card from your hand\n" \
-              "/cards choose <card number> - choose the winning card[s]\n" \
-              "/cards next - start the next round of play"
+HELP_STRING = "/cards newgame - start a new game of cah\n\n" \
+              "/cards join - join a game\n\n" \
+              "/cards start - start the game once everyone has joined\n\n" \
+              "/cards play <card number> - play a card from your hand\n\n" \
+              "/cards choose <card number> - choose the winning card[s]\n\n" \
+              "/cards next - start the next round of play \n\n" \
+              "/cards waiting - who are we waiting to take a turn?\n\n"
 
 
 # example game object layout
@@ -100,8 +107,31 @@ def cards_handler(cmd, cmd_args, dank_json):
         return play_cards(cmd_args, who_id, who_name, roomid)
     elif "choose" in cmd_args:
         return choose(cmd_args, who_id, roomid)
+    elif "waiting" in cmd_args:
+        return waiting_on(roomid)
     else:
         return HELP_STRING
+
+
+def waiting_on(roomid):
+    game = get_game(roomid)
+    if not game:
+        message = "There is no game. \"/cards newgame\" to start"
+        return message
+    have_played = game.rounds.get(str(game.round)).get("turn_taken")
+    all_players = game.players.keys()
+    waiting = []
+    for playerid in all_players:
+        if playerid not in have_played:
+            waiting.append(game.players.get(playerid).get("name"))
+
+    ret = "Waiting on "
+    for person in waiting:
+        ret += person
+        ret += " "
+    return ret
+
+
 
 
 def play_cards(cards, who_id, who_name, roomid):
