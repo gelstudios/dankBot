@@ -27,13 +27,14 @@ redis_connection = redis.StrictRedis(host=os.environ.get("REDIS_HOST"),
 
 cards_data = json.loads(redis_connection.get(REDIS_DATA_KEY))
 
-HELP_STRING = "/cards newgame - start a new game of cah\n\n" \
-              "/cards join - join a game\n\n" \
-              "/cards start - start the game once everyone has joined\n\n" \
-              "/cards play <card number> - play a card from your hand\n\n" \
-              "/cards choose <card number> - choose the winning card[s]\n\n" \
-              "/cards next - start the next round of play \n\n" \
-              "/cards waiting - who are we waiting to take a turn?\n\n"
+HELP_STRING = "/cards newgame - start a new game of cah\n" \
+              "/cards join - join a game\n" \
+              "/cards start - start the game once everyone has joined\n" \
+              "/cards play <card number> - play a card from your hand\n" \
+              "/cards choose <card number> - choose the winning card[s]\n" \
+              "/cards next - start the next round of play \n" \
+              "/cards waiting - who are we waiting to take a turn?\n" \
+              "/cards leave - leave a game in progress\n"
 
 
 # example game object layout
@@ -111,8 +112,14 @@ def cards_handler(cmd, cmd_args, dank_json):
         return waiting_on(roomid)
     elif "leave" in cmd_args:
         return leave_game(roomid, who_id, who_name)
-    else:
+    elif "halp" in cmd_args:
         return HELP_STRING
+    elif "help" in cmd_args:
+        return HELP_STRING
+    elif "die" in cmd_args:
+        return "No."
+    else:
+        return ""
 
 
 def leave_game(roomid, whoid, who_name):
@@ -123,15 +130,20 @@ def leave_game(roomid, whoid, who_name):
 
     if str(whoid) not in game.players.keys():
         return "You are not in this game."
-
+    czar_left = False
     if whoid == game.czar.get("id"):
-            return "The card czar cannot leave during their round!"
+            czar_left = True
+            # return start_round(None, roomid)
+            # return "The card czar cannot leave during their round!"
 
     del game.players[str(whoid)]
 
     if len(game.players) <= 1:
         ret = "Everyone has left. Ending the game."
-        end_game(game)
+        end_game(game, roomid)
+        return ret
+    elif czar_left:
+        ret = "The czar has left the game. Moving to next round. " + start_round(game, roomid)
     else:
         ret = "{who} has left the game.".format(who=who_name)
 
@@ -139,8 +151,9 @@ def leave_game(roomid, whoid, who_name):
     return ret
 
 
-def end_game(game):
-    game.score_cap = -1
+def end_game(game, roomid):
+    del_game(game, roomid)
+    # game.score_cap = -1
 
 
 def waiting_on(roomid):
@@ -158,14 +171,12 @@ def waiting_on(roomid):
 
     ret = "Waiting on "
     if not waiting:
-        ret += "nobody"
+        ret += "{czar} to choose a card.".format(czar=game.czar.get("name"))
     else:
         for person in waiting:
             ret += person
             ret += " "
     return ret
-
-
 
 
 def play_cards(cards, who_id, who_name, roomid):
@@ -241,7 +252,10 @@ def choose(card, who_id, roomid):
     if len(already_played) < len(game.players)-1:
         return "\nPlease wait for all players to play a card..."
     else:
-        winner_name = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("name")
+        try:
+            winner_name = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("name")
+        except AttributeError as ae:
+            return "Could not find card. Did the player leave?"
         score = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("score")
         score += 1
         game.players.get((str(game.round_cards.get(chosen_card).get("userid"))))["score"] = score
@@ -311,6 +325,9 @@ def player_join_game(who_id, who_name, roomid):
     if not game:
         message = "There is no game to join. \"/cards newgame\" to start"
         return message
+    elif str(who_id) in game.players.keys():
+        message = "You have already joined this game."
+        return message
     else:
         game.players[who_id] = {"score": 0, "name": who_name, "hand": {}}
         game.czar_list.append(who_id)
@@ -337,9 +354,11 @@ def start_game(roomid):
 def start_round(game, roomid):
     if not game:
         game = get_game(roomid)
-
-    if game.score_cap < 0:
-        return "The game has ended. Start a new one."
+    try:
+        if game.score_cap < 0:
+            return "The game has ended. Start a new one."
+    except AttributeError as ae:
+        return "There is no game."
 
     if game.black_card > 0:
         if game.rounds[str(game.round)].get("win_cards").get("blackcard") < 0:
@@ -510,3 +529,8 @@ def get_game(roomid):
 def save_game(game, roomid):
     game_name = "card_game." + str(roomid)
     redis_connection.set(game_name, json.dumps(game.__dict__).encode("utf8"))
+
+
+def del_game(game, roomid):
+    game_name = "card_game." + str(roomid)
+    redis_connection.delete(game_name)
