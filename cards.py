@@ -229,7 +229,7 @@ def play_cards(cards, who_id, who_name, roomid):
         message += "\nEveryone has played a card."
         message += "\nWaiting for czar to pick a winner."
 
-        send_czar_cards(game, game.czar.get("id"), game.round_cards)
+        send_czar_cards(game, game.czar.get("id"), game.round_cards, roomid)
 
     save_game(game, roomid)
     return message
@@ -407,7 +407,7 @@ def give_start_cards(game):
         send_cards(player, game.players.get(player)["hand"])
 
 
-def send_czar_cards(game, who_id, cards):
+def send_czar_cards(game, who_id, cards, roomid):
     lines = []
     for num, cards_dict in cards.items():
         cards_text = ""
@@ -438,6 +438,19 @@ def send_czar_cards(game, who_id, cards):
         headers=headers)
     if LOCAL_DEBUG:
         print(r.content)
+
+    if LOCAL_DEBUG:
+        roomid = 2445025
+
+    roomurl = "https://api.hipchat.com/v2/room/{roomid}/message?auth_token={auth}".format(roomid=roomid, auth=AUTH_TOKEN)
+    r2 = requests.post(
+        url=roomurl,
+        data=data_string,
+        headers=headers
+    )
+
+    if LOCAL_DEBUG:
+        print(r2.content)
 
 
 def send_cards(who_id, cards):
