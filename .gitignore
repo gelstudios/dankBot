@@ -2,3 +2,6 @@ venv/
 *.pyc
 *.log
 .idea/
+dankbot.env
+.DS_Store
+
