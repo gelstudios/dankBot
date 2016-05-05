@@ -1,9 +1,3 @@
-# TODO
-# Randomize cards before having card czar pick
-# Ability to leave game, or pause/skip turns until returning
-# Post played cards in room and/or card czars DMs
-
-
 import os
 import redis
 import json
@@ -15,9 +9,9 @@ import string
 LOCAL_DEBUG = os.environ.get("LOCAL_DEBUG")
 
 if LOCAL_DEBUG:
-    AUTH_TOKEN = "iQxcQ2ANRsKv2yCCFWfc7ei0mk6Lk8BQt6HkblKD"
+    AUTH_TOKEN = os.getenv("DEBUG_AUTH_TOKEN")
 else:
-    AUTH_TOKEN = "rRpb4pymoACk31E9yIAUZNKfP18dgTshPgmdCV4l"
+    AUTH_TOKEN = os.getenv("DANKBOT_AUTH_TOKEN")
 
 REDIS_DATA_KEY = "cards_db"
 
@@ -153,7 +147,6 @@ def leave_game(roomid, whoid, who_name):
 
 def end_game(game, roomid):
     del_game(game, roomid)
-    # game.score_cap = -1
 
 
 def waiting_on(roomid):
@@ -181,6 +174,8 @@ def waiting_on(roomid):
 
 def play_cards(cards, who_id, who_name, roomid):
     game = get_game(roomid)
+    if not game:
+        return "There is no game. \"/cards newgame\" to start"
     if who_id == game.czar.get("id"):
         if LOCAL_DEBUG:
             # allow this for testing and debugging
@@ -227,9 +222,9 @@ def play_cards(cards, who_id, who_name, roomid):
 
     if len(already_played) >= len(game.players)-1:
         message += "\nEveryone has played a card."
-        message += "\nWaiting for czar to pick a winner."
+        message += "\nTime to pick a winner!\n\n"
 
-        send_czar_cards(game, game.czar.get("id"), game.round_cards, roomid)
+        message += send_candidates(game)
 
     save_game(game, roomid)
     return message
@@ -256,20 +251,8 @@ def choose(card, who_id, roomid):
             winner_name = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("name")
         except AttributeError as ae:
             return "Could not find card. Did the player leave?"
-        score = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("score")
-        score += 1
-        game.players.get((str(game.round_cards.get(chosen_card).get("userid"))))["score"] = score
-
-        cards_text = ""
-        black_card_text = get_black_card_contents(game.black_card).get("text")
-        for card in game.round_cards.get(chosen_card).get("cards"):
-            current_card_text = get_white_card_contents(card)
-            cards_text += current_card_text
-            if black_card_text.count("_") < 1:
-                black_card_text += " " + current_card_text
-            else:
-                black_card_text = string.replace(black_card_text, "_", current_card_text, 1)
-        line = "{cards_text}".format( cards_text=black_card_text)
+        game.players.get((str(game.round_cards.get(chosen_card).get("userid"))))["score"] += 1
+        line = get_winning_text(game, chosen_card)
 
         message = "The winner of this round is {name} with:\n {card}\n".format(name=winner_name, card=line)
         game.rounds[str(game.round)].get("win_cards")["blackcard"] = game.black_card
@@ -277,12 +260,53 @@ def choose(card, who_id, roomid):
         for whitecard in game.round_cards.get(chosen_card).get("cards"):
             game.rounds[str(game.round)].get("win_cards")["whitecards"].append(whitecard)
 
-        if score >= game.score_cap:
+        winner_score = game.players.get((str(game.round_cards.get(chosen_card).get("userid")))).get("score")
+        if winner_score >= game.score_cap:
             message += "{who} has reached {scorecap} points and wins the game!\n".format(who=winner_name, scorecap=game.score_cap)
-            end_game(game)
+            end_game(game, roomid)
 
         save_game(game, roomid)
         return message
+
+
+def get_winning_text(game, winner_id):
+    return get_cards_text(game, winner_id)
+
+
+def get_losing_text(game, winner_id):
+    losers = []
+    for key, value in game.round_cards.items():
+        if key not in [winner_id]:
+            print(value)
+            losers.append(key)
+
+    losers_text = ""
+    for loser in losers:
+        losers_text += get_cards_text(game, loser)
+        losers_text += "\n"
+    return losers_text
+
+
+def get_all_cards_text(game):
+    all_cards_text = ""
+    for someone in game.round_cards.keys():
+        all_cards_text += "{num}: {text}".format(num=someone, text=get_cards_text(game, someone))
+        all_cards_text += " \n"
+    return all_cards_text
+
+
+def get_cards_text(game, user_id):
+    cards_text = ""
+    black_card_text = get_black_card_contents(game.black_card).get("text")
+    for card in game.round_cards.get(user_id).get("cards"):
+        current_card_text = get_white_card_contents(card)
+        cards_text += current_card_text
+        if black_card_text.count("_") < 1:
+            black_card_text += " " + current_card_text
+        else:
+            black_card_text = string.replace(black_card_text, "_", current_card_text, 1)
+    line = "{cards_text}".format(cards_text=black_card_text)
+    return line
 
 
 def replace_card(card, game, who_id):
@@ -407,50 +431,9 @@ def give_start_cards(game):
         send_cards(player, game.players.get(player)["hand"])
 
 
-def send_czar_cards(game, who_id, cards, roomid):
-    lines = []
-    for num, cards_dict in cards.items():
-        cards_text = ""
-        black_card_text = get_black_card_contents(game.black_card).get("text")
-        for card in cards_dict.get("cards"):
-            current_card_text = get_white_card_contents(card)
-            cards_text += current_card_text
-            if black_card_text.count("_") < 1:
-                black_card_text += " "+current_card_text
-            else:
-                black_card_text = string.replace(black_card_text, "_", current_card_text, 1)
-        line = "{num}: {cards_text}".format(num=num, cards_text=black_card_text)
-        lines.append(line)
-
-    resp = '\n'.join(sorted(lines))
-
-    data = {'message': resp}
-    data_string = json.dumps(data)
-
-    headers = {"Content-Type": "application/json"}
-    # debug
-    if LOCAL_DEBUG:
-        who_id = 2110189
-    url = "https://api.hipchat.com/v2/user/{whoid}/message?auth_token={auth}".format(whoid=who_id, auth=AUTH_TOKEN)
-    r = requests.post(
-        url=url,
-        data=data_string,
-        headers=headers)
-    if LOCAL_DEBUG:
-        print(r.content)
-
-    if LOCAL_DEBUG:
-        roomid = 2445025
-
-    roomurl = "https://api.hipchat.com/v2/room/{roomid}/message?auth_token={auth}".format(roomid=roomid, auth=AUTH_TOKEN)
-    r2 = requests.post(
-        url=roomurl,
-        data=data_string,
-        headers=headers
-    )
-
-    if LOCAL_DEBUG:
-        print(r2.content)
+def send_candidates(game):
+    message = get_all_cards_text(game)
+    return message
 
 
 def send_cards(who_id, cards):
