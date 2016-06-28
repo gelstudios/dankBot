@@ -11,5 +11,6 @@ requests==2.8.1
 rsa==3.3
 simplejson==3.8.2
 six==1.10.0
+twython==3.3.0
 uritemplate==0.6
 wheel==0.24.0
