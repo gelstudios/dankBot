@@ -213,7 +213,6 @@ def handle():
     else:
         message = "welp! command not found: {0}".format(command)
 
-    # the image will be empty if we are using a post response for multiple cards
     if message is None:
         message = u'i got nothing for "{0}", bro'.format(parsed)
 
