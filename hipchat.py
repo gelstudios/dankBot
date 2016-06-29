@@ -235,7 +235,7 @@ def index():
     "dankBot for hipchat by @gelstudios<br>"
     "<br>"
     "The dankest bot in all the land.<br>"
-    "Implements handlers: /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary /cards for cards againt humanity<br>"
+    "Implements handlers: /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary, /cards for cards againt humanity<br>"
     "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities.json</pre><br>"
     "TODO: make api keys easier to manage, implement google_search() handler"
     "</body></html>")
