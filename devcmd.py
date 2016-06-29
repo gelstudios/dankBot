@@ -20,7 +20,7 @@ def rng(p, state):
     return r
 
 def handler(commands, who, state):
-    print "[dankBot] DEV: {0} USR: {1}".format(repr(commands), who)
+    print("[dankBot] DEV: {0} USR: {1}".format(repr(commands), who))
 
     commands = commands.split()
     cmd = commands[0]

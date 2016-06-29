@@ -14,6 +14,9 @@ import random
 
 import battle
 import cards
+from hipchat_notification import text_notification, text_image_card_notification, send_room_post_response
+from dictionary import get_definitions
+
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
@@ -188,7 +191,7 @@ def handle():
     elif command == u'/roll':
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /cards for cards againt humanity"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary, /cards for cards againt humanity"
     elif command == u'/attack':
         message = battle.handler(command, parsed, derp)
     elif command == u'/block':
@@ -199,6 +202,14 @@ def handle():
         message = battle.handler(command, parsed, derp)
     elif command == u'/cards':
         message = cards.cards_handler(command, parsed, derp)
+    elif command == u'/define':
+        definitions = get_definitions(parsed)
+        for definition in definitions:
+            url = search_all(search=parsed)
+            json_str = text_image_card_notification(message=definition, word=parsed, image_url=url)
+            send_room_post_response(data=json_str, room_id=room)
+        if len(definitions) > 0:
+            message = len(definition) + ' definition(s) found for ' + parsed
     else:
         message = "welp! command not found: {0}".format(command)
 
@@ -208,10 +219,8 @@ def handle():
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
 
-    resp = {"color": "random",
-            "message": message,
-            "notify": False,
-            "message_format": "text"}
+    resp = text_notification(message)
+
     # log-message
     # print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""".format(room, who, command, parsed, message))
@@ -225,7 +234,7 @@ def index():
     "dankBot for hipchat by @gelstudios<br>"
     "<br>"
     "The dankest bot in all the land.<br>"
-    "Implements handlers: /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
+    "Implements handlers: /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary, /cards for cards againt humanity<br>"
     "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities.json</pre><br>"
     "TODO: make api keys easier to manage, implement google_search() handler"
     "</body></html>")
