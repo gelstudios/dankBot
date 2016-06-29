@@ -11,10 +11,9 @@ import googleapiclient.discovery
 import json
 import os
 import random
-import requests
 
 import battle
-#import cards
+import cards
 from hipchat_notification import text_notification, text_image_card_notification, send_room_post_response
 from dictionary import get_definitions
 
