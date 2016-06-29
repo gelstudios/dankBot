@@ -17,7 +17,6 @@ import cards
 from hipchat_notification import text_notification
 from dictionary import total_definitions
 
-
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
 google_api_key = os.environ.get('google_api_key', None)
@@ -193,7 +192,7 @@ def handle():
     elif command == u'/roll':
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary, /cards for cards againt humanity"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /cards for cards againt humanity"
     elif command == u'/attack':
         message = battle.handler(command, parsed, derp)
     elif command == u'/block':
@@ -230,7 +229,7 @@ def index():
     "dankBot for hipchat by @gelstudios<br>"
     "<br>"
     "The dankest bot in all the land.<br>"
-    "Implements handlers: /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /define for urban dictionary, /cards for cards againt humanity<br>"
+    "Implements handlers: /dank for imgur, /jank for giphy, /gank for google, /halp for help<br>"
     "To install use this as the integration URL: <pre>http://imgur-hipchat.herokuapp.com/capabilities.json</pre><br>"
     "TODO: make api keys easier to manage, implement google_search() handler"
     "</body></html>")
