@@ -107,7 +107,7 @@ def handler(cmd, cmd_args, dank_json):
     # who = dank_json[u'item'][u'message'][u'from'][u'mention_name']
     who = dank_json[u'item'][u'message'][u'from'][u'name']
 
-    print "[dankBot] Battle: {0} USR: {1}".format(repr(cmd), who_id)
+    print("[dankBot] Battle: {0} USR: {1}".format(repr(cmd), who_id))
 
     # check for player
     player = get_player(who_id)
