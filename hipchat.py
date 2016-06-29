@@ -14,6 +14,8 @@ import random
 
 import battle
 import cards
+from hipchat_notification import text_notification
+from dictionary import total_definitions
 
 imgur_id = os.environ.get('imgur_id', None)
 imgur_secret = os.environ.get('imgur_secret', None)
@@ -26,6 +28,7 @@ state = {
     'HOTSEAT': [u'Pinot'],
     "RNG": 100
     }
+
 
 def search_all(search):
     results = []
@@ -85,6 +88,7 @@ def imgur_search(search=""):
     # print "tag search"
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
+
 
 def giphy_search(search=""):
     try:
@@ -199,6 +203,8 @@ def handle():
         message = battle.handler(command, parsed, derp)
     elif command == u'/cards':
         message = cards.cards_handler(command, parsed, derp)
+    elif command == u'/define':
+        message = total_definitions(define=parsed, room_id=room)
     else:
         message = "welp! command not found: {0}".format(command)
 
@@ -208,10 +214,8 @@ def handle():
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:
         message = "/me thinks @{0} needs to shut the f up...".format(who)
 
-    resp = {"color": "random",
-            "message": message,
-            "notify": False,
-            "message_format": "text"}
+    resp = text_notification(message)
+
     # log-message
     # print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
     print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""".format(room, who, command, parsed, message))
