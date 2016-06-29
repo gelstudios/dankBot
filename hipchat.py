@@ -209,12 +209,13 @@ def handle():
             url = search_all(search=parsed)
             json_str = text_image_card_notification(message=definition, word=parsed, image_url=url)
             send_room_post_response(data=json_str, room_id=room)
-        message = ''
+        if len(definitions) > 0:
+            message = len(definition) + ' definition(s) found for ' + parsed
     else:
         message = "welp! command not found: {0}".format(command)
 
     # the image will be empty if we are using a post response for multiple cards
-    if message is None and json is None:
+    if message is None:
         message = u'i got nothing for "{0}", bro'.format(parsed)
 
     if who in state['HOTSEAT'] and random.randint(0, state['RNG']) == 0:

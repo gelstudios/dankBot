@@ -49,6 +49,10 @@ def send_room_post_response(room_id, data):
     data_string = json.dumps(data)
     headers = {"Content-Type": "application/json"}
 
+    if LOCAL_DEBUG:
+        room_id = 2747855
+        # this is the void room
+
     url = "https://api.hipchat.com/v2/user/{who}/message?auth_token={auth}".format(who=room_id, auth=AUTH_TOKEN)
     r = requests.post(
         url=url,
