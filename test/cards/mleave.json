@@ -1,0 +1,35 @@
+{
+   "oauth_client_id" : "be254e6a-7589-4489-b3ee-f0d3160f6235",
+   "event" : "room_message",
+   "item" : {
+      "room" : {
+         "version" : "PURVZPSI",
+         "privacy" : "private",
+         "id" : 2149233,
+         "name" : "spam",
+         "is_archived" : false,
+         "links" : {
+            "self" : "https://api.hipchat.com/v2/room/2149233",
+            "webhooks" : "https://api.hipchat.com/v2/room/2149233/webhook",
+            "participants" : "https://api.hipchat.com/v2/room/2149233/participant",
+            "members" : "https://api.hipchat.com/v2/room/2149233/member"
+         }
+      },
+      "message" : {
+         "from" : {
+            "version" : "81YPLJYI",
+            "name" : "Michael Emeny",
+            "links" : {
+               "self" : "https://api.hipchat.com/v2/user/2362458"
+            },
+            "id" : 2110189,
+            "mention_name" : "MichaelEmeny"
+         },
+         "date" : "2015-12-09T23:45:36.201670+00:00",
+         "message" : "/cards leave",
+         "id" : "b0736f5f-10e3-4998-bb13-74da3dab956d",
+         "mentions" : [],
+         "type" : "message"
+      }
+   }
+}
