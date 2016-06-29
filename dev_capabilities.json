@@ -15,8 +15,8 @@
             "event" : "room_message" }],
       "hipchatApiConsumer" : {
         "avatar" : {
-          "url" : "http://i.imgur.com/4TUtSHn.gif",
-          "url@2x" : "http://i.imgur.com/4TUtSHn.gif" },
+          "url" : "http://i.imgur.com/hTIN8zT.png",
+          "url@2x" : "http://i.imgur.com/hTIN8zT.png" },
         "fromName" : "dankBot_dev",
         "scopes" : [ "send_notification"] },
       "installable" : {

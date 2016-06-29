@@ -46,25 +46,23 @@ def text_notification(message):
 
 
 def send_room_post_response(room_id, data):
-    data_string = json.dumps(data)
     headers = {"Content-Type": "application/json"}
 
     if LOCAL_DEBUG:
-        room_id = 2747855
         # this is the void room
+        room_id = 2747855
 
-    url = "https://api.hipchat.com/v2/user/{who}/message?auth_token={auth}".format(who=room_id, auth=AUTH_TOKEN)
+    url = "https://api.hipchat.com/v2/room/{who}/message?auth_token={auth}".format(who=room_id, auth=AUTH_TOKEN)
+    print(url)
     r = requests.post(
         url=url,
-        data=data_string,
-        headers=headers)
+        data=json.dumps(data),
+        headers=headers
+    )
 
     if LOCAL_DEBUG:
         print(r.content)
 
-# testing for image card
-# curl -d '{"message_format": "html", "notify": false, "card": {"thumbnail": {"url": "http://i.imgur.com/nlWEZ8V.gif", "width": 1193, "url@2x": "http://i.imgur.com/nlWEZ8V.gif", "height": 564}, "id": "c253adc6-11fa-4941-ae26-7180d67e814a", "style": "link", "url": "http://i.imgur.com/nlWEZ8V.gif", "description": "The removal of excess body hair via waxing, shaving, plucking. Also manscap - ing, ed\n\n<b>When your chick calls you a Yeti, it might be time for a little manscaping.</b>", "format": "medium", "title": "manscape", "date": 1453867674631}, "message": "The removal of excess body hair via waxing, shaving, plucking. Also manscap - ing, ed\n\n<i>When your chick calls you a Yeti, it might be time for a little manscaping.</i>"}' -H 'Content-Type: application/json' https://datto.hipchat.com/v2/room/2881488/notification?auth_token=86yRUjEIki86eKNRRveM7g4L6RERf19gh8QGmJ81
-#
 
-
-#https://datto.hipchat.com/v2/room/2747855/notification?auth_token=JxTyQ8L2ee0PqI0pNHNGvlntbpUHAeThxanG6yYM
+# testing for image card formatting:
+# curl -d '{"message_format": "html", "notify": false, "card": {"thumbnail": {"url": "http://i.imgur.com/nlWEZ8V.gif", "width": 1193, "url@2x": "http://i.imgur.com/nlWEZ8V.gif", "height": 564}, "id": "c253adc6-11fa-4941-ae26-7180d67e814a", "style": "link", "url": "http://i.imgur.com/nlWEZ8V.gif", "description": "The removal of excess body hair via waxing, shaving, plucking. Also manscap - ing, ed\n\n<b>When your chick calls you a Yeti, it might be time for a little manscaping.</b>", "format": "medium", "title": "manscape", "date": 1453867674631}, "message": "The removal of excess body hair via waxing, shaving, plucking. Also manscap - ing, ed\n\n<i>When your chick calls you a Yeti, it might be time for a little manscaping.</i>"}' -H 'Content-Type: application/json' https://datto.hipchat.com/v2/room/2881488/notification?auth_token=77UPpEL65DHDr4qO11eX4fXCduLdMQ4QqMxftUFW

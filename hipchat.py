@@ -14,8 +14,8 @@ import random
 
 import battle
 import cards
-from hipchat_notification import text_notification, text_image_card_notification, send_room_post_response
-from dictionary import get_definitions
+from hipchat_notification import text_notification
+from dictionary import total_definitions
 
 
 imgur_id = os.environ.get('imgur_id', None)
@@ -29,6 +29,7 @@ state = {
     'HOTSEAT': [u'Pinot'],
     "RNG": 100
     }
+
 
 def search_all(search):
     results = []
@@ -88,6 +89,7 @@ def imgur_search(search=""):
     # print "tag search"
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
+
 
 def giphy_search(search=""):
     try:
@@ -203,13 +205,7 @@ def handle():
     elif command == u'/cards':
         message = cards.cards_handler(command, parsed, derp)
     elif command == u'/define':
-        definitions = get_definitions(parsed)
-        for definition in definitions:
-            url = search_all(search=parsed)
-            json_str = text_image_card_notification(message=definition, word=parsed, image_url=url)
-            send_room_post_response(data=json_str, room_id=room)
-        if len(definitions) > 0:
-            message = str(len(definition)) + ' definition(s) found for ' + parsed
+        message = total_definitions(define=parsed, room_id=room)
     else:
         message = "welp! command not found: {0}".format(command)
 
