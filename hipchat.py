@@ -209,7 +209,7 @@ def handle():
             json_str = text_image_card_notification(message=definition, word=parsed, image_url=url)
             send_room_post_response(data=json_str, room_id=room)
         if len(definitions) > 0:
-            message = len(definition) + ' definition(s) found for ' + parsed
+            message = str(len(definition)) + ' definition(s) found for ' + parsed
     else:
         message = "welp! command not found: {0}".format(command)
 
