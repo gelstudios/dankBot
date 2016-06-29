@@ -1,6 +1,6 @@
 import os
 
-authorized = ['eromano','MichaelEmeny','RyanPineau','Charlie']
+authorized = ['eromano','MichaelEmeny','RyanPineau','Charlie', 'JulieGabler']
 
 def hotseat(p, state):
     if p:
