@@ -11,6 +11,8 @@ import googleapiclient.discovery
 import json
 import os
 import random
+from bs4 import BeautifulSoup
+import requests
 
 import battle
 import cards
@@ -27,17 +29,31 @@ state = {
     "RNG": 100
     }
 
+
 def search_all(search):
     results = []
+
+    # all_bing = bing_image_search(search)
+    all_bing_api = bing_api_search(search)
+    if all_bing_api:
+        results.append(all_bing_api)
+        if DEBUG:
+            print("""[dankBot] [DEBUG] search="{0} resource="{1}" Results found.""".format(search, "bing"))
+
     all_imgur = imgur_search(search)
     if all_imgur:
         results.append(all_imgur)
+        if DEBUG:
+            print("""[dankBot] [DEBUG] search="{0} resource="{1}" Results found.""".format(search, "imgur"))
+
     all_giphy = giphy_search(search)
     if all_giphy:
         results.append(all_giphy)
+        if DEBUG:
+            print("""[dankBot] [DEBUG] search="{0} resource="{1}" Results found.""".format(search, "giphy"))
 
     if not results:
-        results.append(google_search(search))
+        results.append(google_api_search(search))
         if not results:
             message = "Somehow got nothing for {0} searching all of the internet, bro.".format(search)
         else:
@@ -45,6 +61,7 @@ def search_all(search):
     else:
         message = random.choice(results)
     return message
+
 
 def imgur_search(search=""):
     try:
@@ -73,18 +90,20 @@ def imgur_search(search=""):
         if len(item.link) > 7 and item.link[-5] == 'h':
             gif_link = item.link[0:-5]+item.link[-4:]
             if DEBUG:
-                print ("""[dankBot] [DEBUG] search="{0}" link="{1}" Large gif link found, modifying link.""").format(search, item.link)
+                print("""[dankBot] [DEBUG] search="{0}" link="{1}" Large gif link found, modifying link."""
+                      .format(search, item.link))
         else:
             gif_link = item.link
     else:
         gif_link = None
         if DEBUG:
-            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "imgur")
+            print("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""".format(search, "imgur"))
     return gif_link
 
     # print "tag search"
     # items = client.gallery_tag("datto", sort='viral', page=0, window='week')
     # print dir(items.items[0])
+
 
 def giphy_search(search=""):
     try:
@@ -101,11 +120,58 @@ def giphy_search(search=""):
     else:
         item = None
         if DEBUG:
-            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "giphy")
+            print("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""".format(search, "giphy"))
     return item
 
 
-def google_search(search=""):
+def get_soup(url, header):
+    page = requests.get(
+        url=url,
+        headers=header)
+    return BeautifulSoup(page.content, "html.parser")
+
+
+# not useful as bing has an api that's reasonable
+def bing_image_search(search=""):
+    search_url = "https://www.bing.com/images/search?q=" + search.replace(' ', '+')
+    search_header = {"User-Agent": "Chrome/51"}
+    soup = get_soup(search_url, search_header)
+    images = soup.find_all("a", attrs={'title': 'View image details'})
+    link = ""
+    if images:
+        img = random.choice(images)
+        try:
+            link = img.attrs.get("m").split("\",")[6].split(":\"")[1]
+        except IndexError as e:
+            print("""[dankBot] [DEBUG] search="{0}" resource="{1}, Exception="{2}" Results found could not be parsed."""
+                  .format(search, "bing", e.message))
+    return link
+
+
+def bing_api_search(search=""):
+    link = ""
+    images = ""
+    headers = {
+        # Request headers
+        'Content-Type': 'multipart/form-data',
+        'Ocp-Apim-Subscription-Key': os.environ.get("BING_AUTH_TOKEN"),
+    }
+    request_url = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + search.replace(' ', '+')
+
+    r = requests.post(
+        url=request_url,
+        headers=headers)
+
+    try:
+        images = json.loads(r.content).get("value")
+    except ValueError as ve:
+        print("""[dankBot] [DEBUG] Bing Api Error {0}. """.format(ve.message))
+    if images:
+        link = random.choice(images).get("contentUrl")
+    return link
+
+
+def google_api_search(search=""):
     service = googleapiclient.discovery.build("customsearch", "v1",
                                               developerKey=google_api_key)
     res = service.cse().list(
@@ -119,24 +185,27 @@ def google_search(search=""):
     if num_results == 0:
         item = None
         if DEBUG:
-            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""").format(search, "google")
+            print ("""[dankBot] [DEBUG] search="{0}" resource="{1}" No results found.""".format(search, "google"))
     else:
         # pprint.pprint(res)
         item = random.choice(res[u'items'])[u'link']
     return item
 
+
 def dankify(words):
     """ /dankify message here! -> returns (m)(e)(s)(s)(a)(g)(e)(space)(h)(e)(r)(e)(bang) """
-    dank = [ "(space)" if w == " " else "(bang)" if w == "!" else "({0})".format(w) for w in words ]
+    dank = ["(space)" if w == " " else "(bang)" if w == "!" else "({0})".format(w) for w in words]
     dank = "".join(dank)
     return dank
 
 app = Bottle()
 
+
 @app.route('/stats')
 def stats():
     client = ImgurClient(imgur_id, imgur_secret)
-    # looks like {u'UserLimit': 500, u'UserRemaining': 500, u'UserReset': 1449849295, u'ClientLimit': 12500, u'ClientRemaining': 11351}
+    # looks like {u'UserLimit': 500, u'UserRemaining': 500,
+    # u'UserReset': 1449849295, u'ClientLimit': 12500, u'ClientRemaining': 11351}
     template = (
     "<html><body>"
     "---Imgur API info---<br>"
@@ -148,17 +217,20 @@ def stats():
     "</body></html>")
     return template.format(**client.credits)
 
+
 @app.route('/capabilities.json')
 def caps():
     with open("capabilities.json", "r") as f:
         c = f.read()
     return c
 
+
 @app.route('/dev_capabilities.json')
 def dev_caps():
     with open("dev_capabilities.json", "r") as f:
         c = f.read()
     return c
+
 
 @app.route('/', method='POST')
 def handle():
@@ -182,19 +254,22 @@ def handle():
     elif command == u'/jank':
         message = giphy_search(search=parsed)
     elif command == u'/gank':
-        message = google_search(search=parsed)
+        message = google_api_search(search=parsed)
     elif command == u'/mank':
         message = imgur_search(search=parsed)
+    elif command == u'/bank':
+        message = bing_api_search(search=parsed)
     elif command == u'/roll':
         message = roll_the_dice(stuff=parsed)
     elif command == u'/halp':
-        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /gank for goog, /roll for roll, /cards for cards againt humanity"
+        message = "bro use /dank for all, /mank for imgur, /jank for giphy, /bank for bing" \
+                  " /gank for goog, /roll for roll, /cards for cards againt humanity"
     elif command == u'/attack':
         message = battle.handler(command, parsed, derp)
     elif command == u'/block':
         message = battle.handler(command, parsed, derp)
     elif command == u'/rez':
-        message = battle.handler(command,parsed, derp)
+        message = battle.handler(command, parsed, derp)
     elif command == u'/status':
         message = battle.handler(command, parsed, derp)
     elif command == u'/cards':
@@ -213,10 +288,11 @@ def handle():
             "notify": False,
             "message_format": "text"}
     # log-message
-    # print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""").format(room, who, command, parsed, message)
-    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}".""".format(room, who, command, parsed, message))
+    print("""[dankBot] room="{0}" who="{1}" cmd="{2}" parsed="{3}" msg="{4}"."""
+          .format(room, who, command, parsed, message))
 
     return json.dumps(resp)
+
 
 @app.route('/', method='GET')
 def index():

@@ -113,7 +113,7 @@ def cards_handler(cmd, cmd_args, dank_json):
     elif "die" in cmd_args:
         return "No."
     else:
-        return ""
+        return "/cards help"
 
 
 def leave_game(roomid, whoid, who_name):
