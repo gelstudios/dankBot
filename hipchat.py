@@ -234,10 +234,37 @@ def dev_caps():
     return c
 
 
-@app.route('/', method='POST')
-def handle():
-    response.content_type = 'application/json'
-    derp = request.json
+def parse_slack_data(data):
+    slack_data = {}
+    for pair in data.split('&'):
+        try:
+            k, v = pair.split('=')
+            slack_data[k] = v
+        except ValueError:
+            pass # some mystery shit i dunno what to do with
+    return slack_data
+
+
+def handle_slack(slack_request):
+    postdata = slack_request.body.read()
+    data = parse_slack_data(postdata)
+    message = ""
+    if 'dank' in data['command']:
+        link = search_all(data['text'])
+        message = format_slack(link)
+    return message
+
+
+def format_slack(link):
+    json_resp = {'response_type': 'in_channel',
+                 'text': link,
+                 }
+    return json_resp
+
+
+def handle_hipchat(hipchat_request):
+
+    derp = hipchat_request.json
     msg = derp[u'item'][u'message'][u'message']
     room = derp[u'item'][u'room'][u'name']
     who = derp[u'item'][u'message'][u'from'][u'mention_name']
@@ -294,6 +321,18 @@ def handle():
           .format(room, who, command, parsed, message))
 
     return json.dumps(resp)
+
+
+@app.route('/', method='POST')
+def handle():
+    if "slackbot" in request.environ.get("HTTP_USER_AGENT").lower():
+        reply = handle_slack(request)
+    else:
+        reply = handle_hipchat(request)
+
+    response.content_type = 'application/json'
+
+    return json.dumps(reply)
 
 
 @app.route('/', method='GET')
