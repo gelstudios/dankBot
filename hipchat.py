@@ -252,6 +252,15 @@ def handle_slack(slack_request):
     if 'dank' in data['command']:
         link = search_all(data['text'])
         message = format_slack(link)
+    elif 'jank' in data['command']:
+        link = giphy_search(data['text'])
+        message = format_slack(link)
+    elif 'gank' in data['command']:
+        link = google_api_search(data['text'])
+        message = format_slack(link)
+    elif 'mank' in data['command']:
+        link = imgur_search(data['text'])
+        message = format_slack(link)
     return message
 
 
