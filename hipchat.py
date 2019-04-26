@@ -25,6 +25,7 @@ google_api_key = os.environ.get('google_api_key', None)
 google_cseid = os.environ.get('google_cseid', None)
 DEBUG = os.environ.get('DEBUG', False)
 NO_BATTLE_MEME = os.environ.get('NOMEME', False)
+giphy_api_key = os.environ.get('giphy_api_key', None)
 
 state = {
     'HOTSEAT': [u'Pinot'],
@@ -109,7 +110,7 @@ def imgur_search(search=""):
 
 def giphy_search(search=""):
     try:
-        client = giphypop.Giphy()
+        client = giphypop.Giphy(api_key=giphy_api_key)
     except Exception as e:
         return u'sorry i could not reach giphy :/ E_MSG: {0}'.format(e)
     try:
