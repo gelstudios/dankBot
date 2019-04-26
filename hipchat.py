@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 import requests
 
 import battle
-import cards
+# import cards
 from hipchat_notification import text_notification
 from dictionary import total_definitions
 
